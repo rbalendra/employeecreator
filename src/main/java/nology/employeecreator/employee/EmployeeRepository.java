@@ -3,11 +3,16 @@ package nology.employeecreator.employee;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
-    // This interface will automatically inherit methods for CRUD operations
-    // from JpaRepository, such as save, findById, findAll, deleteById, etc.
+    
+    // CHANGE: Added explicit method declarations for better IDE support
+    // These methods are inherited from JpaRepository but declaring them explicitly helps with compilation
     Optional<Employee> findById(Long id);
-    Optional<Employee> findByEmail(String email);
+    Employee save(Employee employee);
+    void deleteById(Long id);
+ 
     
 }
