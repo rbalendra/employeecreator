@@ -47,7 +47,8 @@ public class CreateEmployeeDTO {
     @Positive @Max(168)
     private Integer hoursPerWeek;
 
-
+    @Size(max = 500)
+    private String thumbnailUrl;
 
 
 /* --------------------------- getters and setters -------------------------- */
@@ -148,9 +149,13 @@ public class CreateEmployeeDTO {
         this.hoursPerWeek = hoursPerWeek;
     }
 
+      public String getThumbnailUrl() {
+        return thumbnailUrl;
+    }
 
-
-
+       public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
+    }
     
 
 }

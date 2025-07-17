@@ -38,6 +38,12 @@ public class Employee {
     @NotBlank @Size(max=200)
     private String lastName;
 
+    /* ----------------------------- image thumbnail ---------------------------- */
+
+    @Size(max=500)
+    private String thumbnailUrl;
+
+
     /* ----------------------------- contact details ---------------------------- */
     
     @Email
@@ -198,6 +204,13 @@ public class Employee {
         this.hoursPerWeek = hoursPerWeek;
     }
 
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
+    }
+
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
+    }
 
 
     

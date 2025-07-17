@@ -21,7 +21,7 @@ public class EmployeeResponseDTO {
         private boolean ongoing;
         private EmploymentBasis employmentBasis;
         private Integer hoursPerWeek;
-    
+        private String thumbnailUrl;
 
     /* --------------------------- CONSTRUCTORS --------------------------- */
     public EmployeeResponseDTO() {
@@ -82,6 +82,12 @@ public class EmployeeResponseDTO {
         return hoursPerWeek;
     }
 
+
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
+    }
+
+
     /* --------------------------------- SETTERS -------------------------------- */
     public void setId(Long id) {
         this.id = id;
@@ -128,10 +134,14 @@ public class EmployeeResponseDTO {
     public void setEmploymentBasis(EmploymentBasis employmentBasis) {
         this.employmentBasis = employmentBasis;
     }
+
     public void setHoursPerWeek(Integer hoursPerWeek) {
         this.hoursPerWeek = hoursPerWeek;
     }
 
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
+    }
         
 
 }

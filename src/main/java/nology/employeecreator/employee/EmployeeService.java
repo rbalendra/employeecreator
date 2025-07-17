@@ -39,9 +39,9 @@ public class EmployeeService {
         employee.setOngoing(data.isOngoing());
         employee.setEmploymentBasis(data.getEmploymentBasis());
         employee.setHoursPerWeek(data.getHoursPerWeek());
+        employee.setThumbnailUrl(data.getThumbnailUrl());
 
         //save employee to db
-        // CHANGE: Use save() instead of saveAll() - save() is for single entity, saveAll() is for collections
         Employee savedEmployee = this.employeeRepository.save(employee);
 
         //convert saved entity back to response DTO so we can return it to the client
@@ -66,6 +66,7 @@ public class EmployeeService {
             throw new RuntimeException("Employee with id " + id + " not found");
         }
         
+       
         // Convert found employee to response DTO
         return convertToResponseDTO(employee.get());
     }
@@ -79,7 +80,7 @@ public class EmployeeService {
         Employee employeeToUpdate = employeeRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Employee with id " + id + " not found"));
         
-    
+        
        
         
         // Update fields if they are provided
@@ -119,7 +120,9 @@ public class EmployeeService {
         if (data.getOngoing() != null) {
             employeeToUpdate.setOngoing(data.getOngoing());
         }
-        
+         if (data.getThumbnailUrl() != null) { // Add this block
+            employeeToUpdate.setThumbnailUrl(data.getThumbnailUrl());
+        }
         
         // Save updated employee
         Employee updatedEmployee = employeeRepository.save(employeeToUpdate);
@@ -158,6 +161,7 @@ public class EmployeeService {
         response.setOngoing(employee.isOngoing());
         response.setEmploymentBasis(employee.getEmploymentBasis());
         response.setHoursPerWeek(employee.getHoursPerWeek());
+        response.setThumbnailUrl(employee.getThumbnailUrl());
         
         return response;
     }
