@@ -1,36 +1,49 @@
-import { Button } from './Button' // Import our updated Button component
-import { MdDashboard, MdPeople, MdPersonAdd, MdBusiness } from 'react-icons/md' // Modern icons
+import { Link, useNavigate } from 'react-router' // Import React Router hooks
+import { Button } from './Button'
+import { MdDashboard, MdPeople, MdPersonAdd, MdBusiness } from 'react-icons/md'
 
 interface NavbarProps {
 	currentPage?: string
-	onNavigate?: (page: string) => void // Add navigation callback
 }
 
-export const Navbar = ({
-	currentPage = 'dashboard',
-	onNavigate,
-}: NavbarProps) => {
-	// Navigation menu items with React Icons
+export const Navbar = ({ currentPage = 'dashboard' }: NavbarProps) => {
+	const navigate = useNavigate() // Hook for programmatic navigation
+
+	// NAVIGATION ITEMS: Now with URL paths instead of page IDs
 	const navItems = [
-		{ id: 'dashboard', label: 'Dashboard', icon: <MdDashboard /> },
-		{ id: 'employees', label: 'Employees', icon: <MdPeople /> },
-		{ id: 'add-employee', label: 'Add Employee', icon: <MdPersonAdd /> },
+		{
+			id: 'dashboard',
+			label: 'Dashboard',
+			icon: <MdDashboard />,
+			path: '/dashboard',
+		},
+		{
+			id: 'employees',
+			label: 'Employees',
+			icon: <MdPeople />,
+			path: '/employees',
+		},
+		{
+			id: 'add-employee',
+			label: 'Add Employee',
+			icon: <MdPersonAdd />,
+			path: '/add-employee',
+		},
 	]
 
-	// Handle navigation click - this function gets passed to each Button
-	const handleNavClick = (pageId: string) => {
-		if (onNavigate) {
-			onNavigate(pageId)
-		}
+	// NAVIGATION HANDLER: Use React Router's navigate function
+	const handleNavClick = (path: string) => {
+		navigate(path)
 	}
 
 	return (
 		<nav className='bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50'>
 			<div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
 				<div className='flex justify-between h-16'>
-					{/* Logo and Brand */}
 					<div className='flex items-center'>
-						<div className='flex-shrink-0 flex items-center'>
+						<Link
+							to='/dashboard'
+							className='flex-shrink-0 flex items-center hover:opacity-80 transition-opacity'>
 							<div className='text-2xl mr-3 text-orange-500'>
 								<MdBusiness />
 							</div>
@@ -42,20 +55,19 @@ export const Navbar = ({
 									CRM Dashboard
 								</p>
 							</div>
-						</div>
+						</Link>
 					</div>
 
-					{/* Navigation Menu - Now using our modern Button component */}
+					{/* NAVIGATION MENU: Using Router navigation */}
 					<div className='flex items-center space-x-1 gap-3'>
 						{navItems.map((item) => (
 							<Button
 								key={item.id}
-								variant='secondary' // Use secondary variant for navigation
-								size='sm' // Medium size buttons
-								isActive={currentPage === item.id} // Pass active state - Button will style itself accordingly
-								onClick={() => handleNavClick(item.id)} // Pass click handler - Button will call this when clicked
+								variant='secondary'
+								size='md'
+								isActive={currentPage === item.id} // Still check current page for active state
+								onClick={() => handleNavClick(item.path)} // Navigate to the path
 							>
-								{/* Button content - icon and label */}
 								<span className='text-lg'>{item.icon}</span>
 								<span>{item.label}</span>
 							</Button>

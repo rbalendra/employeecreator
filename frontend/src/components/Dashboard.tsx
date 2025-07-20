@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { StatCard } from './StatCard'
 import { EmployeeCard } from './EmployeeCard'
+import { EmployeeDetailsModal } from './EmployeeDetailsModal'
 import { Button } from './Button'
 import {
 	getDashboardStats,
@@ -34,6 +35,12 @@ export const Dashboard = () => {
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 
+	// Modal state
+	const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+		null
+	)
+	const [isModalOpen, setIsModalOpen] = useState(false)
+
 	// Fetch dashboard data on component mount
 	useEffect(() => {
 		const fetchDashboardData = async () => {
@@ -65,6 +72,19 @@ export const Dashboard = () => {
 
 		fetchDashboardData()
 	}, [])
+
+	// Handle employee viewing (show modal)
+	const handleViewEmployee = (employee: Employee) => {
+		console.log('👁️ View employee details:', employee)
+		setSelectedEmployee(employee)
+		setIsModalOpen(true)
+	}
+
+	// Close modal
+	const handleCloseModal = () => {
+		setIsModalOpen(false)
+		setSelectedEmployee(null)
+	}
 
 	// Show loading state with modern spinner
 	if (loading) {
@@ -195,7 +215,7 @@ export const Dashboard = () => {
 									<EmployeeCard
 										key={employee.id}
 										employee={employee}
-										onView={(emp) => console.log('View employee:', emp)}
+										onView={handleViewEmployee}
 									/>
 								))}
 							</div>
@@ -219,6 +239,13 @@ export const Dashboard = () => {
 					</div>
 				</div>
 			</div>
+
+			{/* Employee Details Modal */}
+			<EmployeeDetailsModal
+				employee={selectedEmployee}
+				isOpen={isModalOpen}
+				onClose={handleCloseModal}
+			/>
 		</div>
 	)
 }

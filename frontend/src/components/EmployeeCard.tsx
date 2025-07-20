@@ -22,14 +22,14 @@ export const EmployeeCard = ({
 	// Helper function to get contract type badge color
 	const getContractTypeColor = (contractType: string) => {
 		return contractType === 'PERMANENT'
-			? 'bg-green-100 text-green-800'
-			: 'bg-blue-100 text-blue-800'
+			? 'bg-green-100 text-green-800 border'
+			: 'bg-blue-100 text-blue-800 border'
 	}
 
 	// Helper function to get employment basis badge color
 	const getEmploymentBasisColor = (basis: string) => {
 		return basis === 'FULL_TIME'
-			? 'bg-purple-100 text-purple-800'
+			? 'bg-purple-100 text-purple-800 border'
 			: 'bg-orange-100 text-orange-800'
 	}
 
@@ -81,7 +81,7 @@ export const EmployeeCard = ({
 						{employee.employmentBasis.replace('_', '-')}
 					</span>
 					{employee.ongoing && (
-						<span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800'>
+						<span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border'>
 							ACTIVE
 						</span>
 					)}
@@ -101,7 +101,7 @@ export const EmployeeCard = ({
 
 			{/* Action Buttons */}
 			{(onView || onEdit || onDelete) && (
-				<div className='mt-4 flex space-x-2'>
+				<div className='mt-4 flex space-x-2 gap-2 cursor-pointer text-m'>
 					{onView && (
 						<button
 							onClick={() => onView(employee)}
@@ -119,7 +119,7 @@ export const EmployeeCard = ({
 					{onDelete && (
 						<button
 							onClick={() => onDelete(employee.id)}
-							className='text-red-600 hover:text-red-800 text-sm font-medium'>
+							className='text-red-600 hover:text-red-800 text-sm font-medium '>
 							Delete
 						</button>
 					)}
