@@ -35,7 +35,7 @@ public class EmployeeService {
         employee.setResidentialAddress(data.getResidentialAddress().trim());
         employee.setContractType(data.getContractType());
         employee.setStartDate(data.getStartDate());
-        employee.setFinishDate(data.getEndDate());
+        employee.setFinishDate(data.getFinishDate());
         employee.setOngoing(data.isOngoing());
         employee.setEmploymentBasis(data.getEmploymentBasis());
         employee.setHoursPerWeek(data.getHoursPerWeek());

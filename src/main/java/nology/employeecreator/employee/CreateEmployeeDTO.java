@@ -37,7 +37,7 @@ public class CreateEmployeeDTO {
     @NotNull
     private LocalDate startDate;
 
-    private LocalDate endDate; 
+    private LocalDate finishDate; 
 
     private boolean ongoing;
 
@@ -117,12 +117,12 @@ public class CreateEmployeeDTO {
         this.startDate = startDate;
     }
 
-    public LocalDate getEndDate() {
-        return endDate;
+    public LocalDate getFinishDate() {
+        return finishDate;
     }
 
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
+    public void setFinishDate(LocalDate finishDate) {
+        this.finishDate = finishDate;
     }
 
     public boolean isOngoing() {

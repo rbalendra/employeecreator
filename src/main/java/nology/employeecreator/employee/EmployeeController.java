@@ -1,6 +1,7 @@
 package nology.employeecreator.employee;
 
 import java.net.URI;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,11 +38,20 @@ public class EmployeeController {
         // convert DTO to entity, validate, save to database, return response
         EmployeeResponseDTO saved = this.employeeService.createEmployee(data);
 
-         // Location header → /api/employees/{id}
+        // Location header → /api/employees/{id}
         URI location = URI.create("/api/employees/" + saved.getId());
         return ResponseEntity.created(location).body(saved);
     }
     
+       /* --------------------------- GET /api/employees (ALL) --------------------- */
+    @GetMapping
+    public List<EmployeeResponseDTO> getAllEmployees() {
+        // Get all employees from service layer
+        return this.employeeService.getAllEmployees();
+    }
+
+
+
     /* --------------------------- GET /api/employees --------------------------- */
     @GetMapping("/{id}")
     public EmployeeResponseDTO getEmployee(@PathVariable Long id) {
