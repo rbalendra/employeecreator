@@ -1,23 +1,33 @@
-import { useNavigate } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
+import { useEffect, useState } from 'react'
 import { employeeSchema, type EmployeeFormData } from './schema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { createEmployee, type CreateEmployeeDTO } from '../services/employees'
-import { MdArrowBack, MdPersonAdd, MdSave } from 'react-icons/md'
+import {
+	createEmployee,
+	updateEmployee,
+	getEmployeeById,
+	type CreateEmployeeDTO,
+	type UpdateEmployeeDTO,
+} from '../services/employees'
+import { MdArrowBack, MdPersonAdd, MdSave, MdEdit } from 'react-icons/md'
 import { Button } from '../components/Button'
 
 export const AddEmployeePage = () => {
-	const navigate = useNavigate() // Hook to navigate to other pages
+	const navigate = useNavigate()
+	const { id } = useParams<{ id: string }>() // Get employee ID from URL if editing
+	const isEditing = Boolean(id) // Check if we're in edit mode
+	const [loading, setLoading] = useState(false)
 
 	// FORM SETUP: Initialize React Hook Form with validation and default values
 	const {
-		register, // connects form inputs to react-hook-form
-		handleSubmit, // Function to handle form submission
-		formState: { errors, isSubmitting }, // Current form state and any validation errors
-		reset, // Function to clear the form fields
-		watch, // Function to watch field values for dynamic behavior
+		register,
+		handleSubmit,
+		formState: { errors, isSubmitting },
+		reset,
+		watch,
 	} = useForm<EmployeeFormData>({
-		resolver: zodResolver(employeeSchema), // Use our Zod schema for validation
+		resolver: zodResolver(employeeSchema),
 		defaultValues: {
 			firstName: '',
 			middleName: '',
@@ -35,36 +45,110 @@ export const AddEmployeePage = () => {
 		},
 	})
 
+	// LOAD EMPLOYEE DATA: If editing, fetch and populate the form
+	useEffect(() => {
+		const loadEmployeeData = async () => {
+			if (!isEditing || !id) return
+
+			try {
+				setLoading(true)
+				console.log('Loading employee data for editing:', id)
+				const employee = await getEmployeeById(Number(id))
+
+				// Populate form with existing employee data
+				reset({
+					firstName: employee.firstName,
+					middleName: employee.middleName || '',
+					lastName: employee.lastName,
+					email: employee.email,
+					mobileNumber: employee.mobileNumber,
+					residentialAddress: employee.residentialAddress,
+					contractType: employee.contractType,
+					employmentBasis: employee.employmentBasis,
+					startDate: employee.startDate,
+					finishDate: employee.finishDate || '',
+					ongoing: employee.ongoing,
+					hoursPerWeek: employee.hoursPerWeek || 40,
+					thumbnailUrl: employee.thumbnailUrl || '',
+				})
+
+				console.log('✅ Employee data loaded for editing')
+			} catch (error) {
+				console.error('❌ Error loading employee data:', error)
+				alert('Failed to load employee data. Please try again.')
+				navigate('/employees') // Redirect back if loading fails
+			} finally {
+				setLoading(false)
+			}
+		}
+
+		loadEmployeeData()
+	}, [isEditing, id, reset, navigate])
+
 	// DYNAMIC FIELD VISIBILITY: Watch the 'ongoing' checkbox to show/hide finish date
 	const isOngoing = watch('ongoing')
 
 	// FORM SUBMISSION HANDLER: This runs when the user submits the form
 	const onSubmit = async (data: EmployeeFormData) => {
 		try {
-			console.log('Creating new employee with data:', data)
+			console.log(
+				`${isEditing ? 'Updating' : 'Creating'} employee with data:`,
+				data
+			)
 
-			// TRANSFORM DATA: Convert form data to match API requirements
-			const employeeData: CreateEmployeeDTO = {
-				...data, // Copy all form fields
-				// If ongoing is true, don't send finishDate
-				finishDate: data.ongoing ? undefined : data.finishDate,
-				// Convert empty string to undefined for optional fields
-				middleName: data.middleName || undefined,
-				thumbnailUrl: data.thumbnailUrl || undefined,
-				hoursPerWeek: data.hoursPerWeek || undefined,
+			if (isEditing && id) {
+				// UPDATE EXISTING EMPLOYEE
+				const updateData: UpdateEmployeeDTO = {
+					...data,
+					finishDate: data.ongoing ? undefined : data.finishDate,
+					middleName: data.middleName || undefined,
+					thumbnailUrl: data.thumbnailUrl || undefined,
+					hoursPerWeek: data.hoursPerWeek || undefined,
+				}
+
+				await updateEmployee(Number(id), updateData)
+				alert('Employee updated successfully!')
+			} else {
+				// CREATE NEW EMPLOYEE
+				const employeeData: CreateEmployeeDTO = {
+					...data,
+					finishDate: data.ongoing ? undefined : data.finishDate,
+					middleName: data.middleName || undefined,
+					thumbnailUrl: data.thumbnailUrl || undefined,
+					hoursPerWeek: data.hoursPerWeek || undefined,
+				}
+
+				await createEmployee(employeeData)
+				alert('Employee created successfully!')
+				reset() // Only reset form when creating new employee
 			}
 
-			// API CALL: Send employee data to backend to create employee
-			await createEmployee(employeeData)
-
-			// SUCCESS HANDLING
-			alert('Employee created successfully!')
-			reset() // Clear the form fields
-			navigate('/employees') // redirect to employees page
+			navigate('/employees') // Redirect to employees page
 		} catch (error) {
-			console.error('Error creating employee:', error)
-			alert('Failed to create employee. Please try again.')
+			console.error(
+				`Error ${isEditing ? 'updating' : 'creating'} employee:`,
+				error
+			)
+			alert(
+				`Failed to ${
+					isEditing ? 'update' : 'create'
+				} employee. Please try again.`
+			)
 		}
+	}
+
+	// Show loading state while fetching employee data for editing
+	if (loading) {
+		return (
+			<div className='min-h-screen bg-gray-50 flex items-center justify-center'>
+				<div className='text-center'>
+					<div className='inline-block animate-spin rounded-full h-8 w-8 border-2 border-orange-500 border-t-transparent mb-4'></div>
+					<p className='text-gray-600 text-sm font-medium'>
+						Loading employee data...
+					</p>
+				</div>
+			</div>
+		)
 	}
 
 	return (
@@ -76,15 +160,16 @@ export const AddEmployeePage = () => {
 						<div className='flex items-center justify-between'>
 							<div className='flex items-center space-x-3'>
 								<div className='text-2xl text-orange-500'>
-									<MdPersonAdd />
+									{isEditing ? <MdEdit /> : <MdPersonAdd />}
 								</div>
 								<div>
 									<h1 className='text-xl font-semibold text-gray-900'>
-										Add New Employee
+										{isEditing ? 'Edit Employee' : 'Add New Employee'}
 									</h1>
 									<p className='text-sm text-gray-600'>
-										Fill in all required information to create a new employee
-										record
+										{isEditing
+											? 'Update employee information'
+											: 'Fill in all required information to create a new employee record'}
 									</p>
 								</div>
 							</div>
@@ -354,8 +439,15 @@ export const AddEmployeePage = () => {
 									<input
 										{...register('finishDate')}
 										type='date'
-										className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
+										className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
+											errors.finishDate ? 'border-red-500' : 'border-gray-300'
+										}`}
 									/>
+									{errors.finishDate && (
+										<p className='mt-1 text-sm text-red-600'>
+											{errors.finishDate.message}
+										</p>
+									)}
 								</div>
 							)}
 						</div>
@@ -373,12 +465,14 @@ export const AddEmployeePage = () => {
 								{isSubmitting ? (
 									<>
 										<div className='animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent '></div>
-										Creating Employee...
+										{isEditing
+											? 'Updating Employee...'
+											: 'Creating Employee...'}
 									</>
 								) : (
 									<>
 										<MdSave className='mr-3' />
-										Create Employee
+										{isEditing ? 'Update Employee' : 'Create Employee'}
 									</>
 								)}
 							</Button>

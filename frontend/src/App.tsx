@@ -15,7 +15,7 @@ function App() {
 					<Route path='/dashboard' element={<Dashboard />} />
 					<Route path='/employees' element={<EmployeesPage />} />
 					\ <Route path='/add-employee' element={<AddEmployeePage />} />
-					{/* 🚫 404 FALLBACK: Any other URL redirects to Dashboard */}
+					<Route path='/edit-employee/:id' element={<AddEmployeePage />} />
 					<Route path='*' element={<Dashboard />} />
 				</Routes>
 			</Layout>

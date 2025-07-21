@@ -93,7 +93,7 @@ export const EmployeeDetailsModal = ({
 							<div className='flex-shrink-0'>
 								{employee.thumbnailUrl ? (
 									<img
-										className='h-16 w-16 rounded-full object-cover border-2 border-gray-200'
+										className='h-30 w-30 rounded-full object-cover border-2 border-gray-200'
 										src={employee.thumbnailUrl}
 										alt={`${employee.firstName} ${employee.lastName}`}
 									/>

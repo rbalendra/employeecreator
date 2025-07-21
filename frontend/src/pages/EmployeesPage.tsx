@@ -139,13 +139,8 @@ export const EmployeesPage = () => {
 
 	// Handle employee editing (navigate to edit page)
 	const handleEditEmployee = (employee: Employee) => {
-		// For now, we'll navigate to add employee page
-		// In a real app, you'd create an EditEmployeePage
 		console.log('✏️ Edit employee:', employee)
-		alert(
-			`Edit functionality for ${employee.firstName} ${employee.lastName} coming soon!`
-		)
-		// navigate(`/edit-employee/${employee.id}`)
+		navigate(`/edit-employee/${employee.id}`)
 	}
 
 	// Handle employee viewing (show modal)
