@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 public class EmployeeService {
     
     // inject the EmployeeRepository to interact with the database
+     // Repository for CRUD operations on Employee entities
     private EmployeeRepository employeeRepository;
 
     // Constructor injection for EmployeeRepository
@@ -21,7 +22,8 @@ public class EmployeeService {
         this.employeeRepository = employeeRepository;
     }
     
-/* -------------------------- SEARCH FUNCTIONALITY -------------------------- */
+    /* -------------------------- SEARCH FUNCTIONALITY -------------------------- */
+    //Performs an “advanced” in‑memory search over all employees,applying optional filters and sorting.
 public List<EmployeeResponseDTO> advancedSearch(
             String firstName,
             String lastName,
@@ -34,11 +36,24 @@ public List<EmployeeResponseDTO> advancedSearch(
 ) {
     
 
-    // Start with all employees
+
+
+
+    // Fetch everything from the database
     List<Employee> allEmployees = employeeRepository.findAll();
     List<Employee> filteredEmployees = allEmployees;
 
-    // Apply search filter first (search by name only)
+          // Apply ongoing filter
+    if (ongoing != null) {
+        
+        filteredEmployees = filteredEmployees.stream()
+                .filter(emp -> emp.isOngoing() == ongoing)
+                .collect(Collectors.toList());
+
+    }
+
+
+    // Apply search filter first (search by firstname or last name)
     if (firstName != null && !firstName.trim().isEmpty()) {
         String searchTerm = firstName.trim().toLowerCase();
         
@@ -51,7 +66,7 @@ public List<EmployeeResponseDTO> advancedSearch(
         
     }
 
-    // Apply contract type filter
+    // Contract type filter: skip if ALL, otherwise parse to enum and filter
     if (contractType != null && !"ALL".equals(contractType)) {
         try {
             ContractType filterType = ContractType.valueOf(contractType);
@@ -79,20 +94,11 @@ public List<EmployeeResponseDTO> advancedSearch(
             System.out.println("Invalid employment basis: " + employmentBasis);
         }
     }
-    
-    // Apply ongoing filter
-    if (ongoing != null) {
-        
-        filteredEmployees = filteredEmployees.stream()
-                .filter(emp -> emp.isOngoing() == ongoing)
-                .collect(Collectors.toList());
+ 
 
-    }
-
-    // Apply sorting
-    Sort sort = createSort(sortBy, sortDirection);
     
-    // Sort the filtered list
+    
+    // Perform the actual list sorting based on sortBy & sortDirection
     if ("firstName".equals(sortBy)) {
         filteredEmployees.sort((a, b) -> {
             int result = a.getFirstName().compareToIgnoreCase(b.getFirstName());
@@ -110,12 +116,14 @@ public List<EmployeeResponseDTO> advancedSearch(
         });
     }
 
+    // Map each Employee entity to a response DTO for the client
     return filteredEmployees.stream()
             .map(this::convertToResponseDTO)
             .collect(Collectors.toList());
 }
 
-    /* --------------------------------- CREATE --------------------------------- */
+/* --------------------------------- CREATE --------------------------------- */
+    //Creates a new Employee record from the given DTO saves it to the database, and returns the saved data as a DTO.
     public EmployeeResponseDTO createEmployee(CreateEmployeeDTO data) {
         //create new emp entity
         Employee employee = new Employee();
@@ -237,6 +245,7 @@ public List<EmployeeResponseDTO> advancedSearch(
         employeeRepository.deleteById(id);
     }
 
+    /* ----------------------------- SORTING HELPERS ---------------------------- */
         private Sort createSort(String sortBy, String sortDirection) {
         // Default sorting if no parameters provided
         if (sortBy == null || sortBy.trim().isEmpty()) {
