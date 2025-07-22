@@ -196,7 +196,7 @@ export const AddEmployeePage = () => {
 									<input
 										{...register('firstName')}
 										type='text'
-										className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
+										className={`w-full px-3 py-2 border rounded-lg ${
 											errors.firstName ? 'border-red-500' : 'border-gray-300'
 										}`}
 										placeholder='Enter first name'
@@ -216,7 +216,7 @@ export const AddEmployeePage = () => {
 									<input
 										{...register('middleName')}
 										type='text'
-										className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
+										className='w-full px-3 py-2 border border-gray-300 rounded-lg '
 										placeholder='Enter middle name (optional)'
 									/>
 								</div>
@@ -229,7 +229,7 @@ export const AddEmployeePage = () => {
 									<input
 										{...register('lastName')}
 										type='text'
-										className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
+										className={`w-full px-3 py-2 border rounded-lg  ${
 											errors.lastName ? 'border-red-500' : 'border-gray-300'
 										}`}
 										placeholder='Enter last name'
@@ -249,7 +249,7 @@ export const AddEmployeePage = () => {
 									<input
 										{...register('thumbnailUrl')}
 										type='url'
-										className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
+										className={`w-full px-3 py-2 border rounded-lg  ${
 											errors.thumbnailUrl ? 'border-red-500' : 'border-gray-300'
 										}`}
 										placeholder='https://example.com/photo.jpg'
@@ -277,7 +277,7 @@ export const AddEmployeePage = () => {
 									<input
 										{...register('email')}
 										type='email'
-										className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
+										className={`w-full px-3 py-2 border rounded-lg  ${
 											errors.email ? 'border-red-500' : 'border-gray-300'
 										}`}
 										placeholder='Enter email address'
@@ -297,7 +297,7 @@ export const AddEmployeePage = () => {
 									<input
 										{...register('mobileNumber')}
 										type='tel'
-										className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
+										className={`w-full px-3 py-2 border rounded-lg  ${
 											errors.mobileNumber ? 'border-red-500' : 'border-gray-300'
 										}`}
 										placeholder='Enter mobile number'
@@ -318,7 +318,7 @@ export const AddEmployeePage = () => {
 								<textarea
 									{...register('residentialAddress')}
 									rows={3}
-									className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
+									className={`w-full px-3 py-2 border rounded-lg  ${
 										errors.residentialAddress
 											? 'border-red-500'
 											: 'border-gray-300'
@@ -346,7 +346,7 @@ export const AddEmployeePage = () => {
 									</label>
 									<select
 										{...register('contractType')}
-										className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
+										className={`w-full px-3 py-2 border rounded-lg  ${
 											errors.contractType ? 'border-red-500' : 'border-gray-300'
 										}`}>
 										<option value='PERMANENT'>Permanent</option>
@@ -366,7 +366,7 @@ export const AddEmployeePage = () => {
 									</label>
 									<select
 										{...register('employmentBasis')}
-										className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
+										className={`w-full px-3 py-2 border rounded-lg  ${
 											errors.employmentBasis
 												? 'border-red-500'
 												: 'border-gray-300'
@@ -389,7 +389,7 @@ export const AddEmployeePage = () => {
 									<input
 										{...register('startDate')}
 										type='date'
-										className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 ${
+										className={`w-full px-3 py-2 border rounded-lg  ${
 											errors.startDate ? 'border-red-500' : 'border-gray-300'
 										}`}
 									/>
@@ -410,7 +410,7 @@ export const AddEmployeePage = () => {
 										type='number'
 										min='1'
 										max='168'
-										className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500'
+										className='w-full px-3 py-2 border border-gray-300 rounded-lg '
 										placeholder='40'
 									/>
 								</div>

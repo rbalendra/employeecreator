@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/api/employees")
@@ -31,6 +33,28 @@ public class EmployeeController {
 
     /* ------------------------------- END POINTS ------------------------------- */
 
+   /* ------------------------ SEARCH / FILTER ENDPOINT ------------------------ */
+@GetMapping("/search")
+public List<EmployeeResponseDTO> searchEmployees(
+    @RequestParam(required=false) String firstName,
+    @RequestParam(required=false) String lastName,
+    @RequestParam(required=false) String email,
+    @RequestParam(required=false) String contractType,
+    @RequestParam(required=false) String employmentBasis,
+    @RequestParam(required=false) Boolean ongoing,
+    @RequestParam(required = false, defaultValue = "firstName") String sortBy,
+    @RequestParam(required = false, defaultValue = "asc") String sortDirection
+) {
+    System.out.println("GET /api/employees/search called");
+    return employeeService.advancedSearch(
+        firstName, lastName, email, contractType, 
+        employmentBasis, ongoing, sortBy, sortDirection
+    );
+}
+    
+
+
+
     /* --------------------------- POST /api/employees -------------------------- */
     @PostMapping
     public ResponseEntity<EmployeeResponseDTO> createEmployee(@Valid @RequestBody CreateEmployeeDTO data) {
@@ -44,11 +68,14 @@ public class EmployeeController {
     }
     
        /* --------------------------- GET /api/employees (ALL) --------------------- */
-    @GetMapping
-    public List<EmployeeResponseDTO> getAllEmployees() {
-        // Get all employees from service layer
-        return this.employeeService.getAllEmployees();
-    }
+   @GetMapping
+public List<EmployeeResponseDTO> getAllEmployees() {
+    System.out.println("📋 GET /api/employees called");
+    List<EmployeeResponseDTO> employees = employeeService.getAllEmployees();
+    System.out.println("✅ Returning " + employees.size() + " employees");
+    return employees;
+}
+
 
 
 

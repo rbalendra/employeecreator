@@ -30,7 +30,7 @@ export const EmployeeCard = ({
 	const getEmploymentBasisColor = (basis: string) => {
 		return basis === 'FULL_TIME'
 			? 'bg-purple-100 text-purple-800 border'
-			: 'bg-orange-100 text-orange-800'
+			: 'bg-orange-100 text-orange-800 border'
 	}
 
 	return (
@@ -80,20 +80,19 @@ export const EmployeeCard = ({
 						)}`}>
 						{employee.employmentBasis.replace('_', '-')}
 					</span>
-					{employee.ongoing && (
-						<span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border'>
-							ACTIVE
-						</span>
-					)}
 				</div>
 
 				{/* Additional Info */}
 				<div className='text-sm text-gray-600'>
-					<p>Start Date: {new Date(employee.startDate).toLocaleDateString()}</p>
+					<p>
+						Start Date:{' '}
+						{new Date(employee.startDate).toLocaleDateString('en-AU')}
+					</p>
 					{employee.hoursPerWeek && <p>Hours/Week: {employee.hoursPerWeek}</p>}
 					{employee.finishDate && (
 						<p>
-							End Date: {new Date(employee.finishDate).toLocaleDateString()}
+							End Date:{' '}
+							{new Date(employee.finishDate).toLocaleDateString('en-AU')}
 						</p>
 					)}
 				</div>

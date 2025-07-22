@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 
@@ -15,10 +18,120 @@ public class EmployeeService {
     private EmployeeRepository employeeRepository;
 
     // Constructor injection for EmployeeRepository
-    EmployeeService(EmployeeRepository employeeRepository) {
+    public EmployeeService(EmployeeRepository employeeRepository) {
         this.employeeRepository = employeeRepository;
     }
     
+/* -------------------------- SEARCH FUNCTIONALITY -------------------------- */
+public List<EmployeeResponseDTO> advancedSearch(
+            String firstName,
+            String lastName,
+            String email,
+            String contractType,
+            String employmentBasis,
+            Boolean ongoing,
+            String sortBy,
+            String sortDirection
+) {
+    System.out.println("🔍 AdvancedSearch called with:");
+    System.out.println("  firstName: " + firstName);
+    System.out.println("  lastName: " + lastName);
+    System.out.println("  contractType: " + contractType);
+    System.out.println("  employmentBasis: " + employmentBasis);
+    System.out.println("  ongoing: " + ongoing);
+    System.out.println("  sortBy: " + sortBy);
+    System.out.println("  sortDirection: " + sortDirection);
+
+    // Start with all employees
+    List<Employee> allEmployees = employeeRepository.findAll();
+    List<Employee> filteredEmployees = allEmployees;
+
+    // Apply search filter first (search by name only)
+    if (firstName != null && !firstName.trim().isEmpty()) {
+        String searchTerm = firstName.trim().toLowerCase();
+        System.out.println("🔍 Filtering by name search term: " + searchTerm);
+        
+        filteredEmployees = filteredEmployees.stream()
+                .filter(emp -> 
+                    emp.getFirstName().toLowerCase().contains(searchTerm) ||
+                    emp.getLastName().toLowerCase().contains(searchTerm)
+                )
+                .collect(Collectors.toList());
+        
+        System.out.println("📊 After name search: " + filteredEmployees.size() + " employees");
+    }
+
+    // Apply contract type filter
+    if (contractType != null && !"ALL".equals(contractType)) {
+        try {
+            ContractType filterType = ContractType.valueOf(contractType);
+            System.out.println("🔍 Filtering by contract type: " + filterType);
+            
+            filteredEmployees = filteredEmployees.stream()
+                    .filter(emp -> emp.getContractType() == filterType)
+                    .collect(Collectors.toList());
+            
+            System.out.println("📊 After contract filter: " + filteredEmployees.size() + " employees");
+        } catch (IllegalArgumentException e) {
+            System.out.println("❌ Invalid contract type: " + contractType);
+        }
+    }
+    
+    // Apply employment basis filter
+    if (employmentBasis != null && !"ALL".equals(employmentBasis)) {
+        try {
+            EmploymentBasis filterBasis = EmploymentBasis.valueOf(employmentBasis);
+            System.out.println("🔍 Filtering by employment basis: " + filterBasis);
+            
+            filteredEmployees = filteredEmployees.stream()
+                    .filter(emp -> emp.getEmploymentBasis() == filterBasis)
+                    .collect(Collectors.toList());
+            
+            System.out.println("📊 After employment filter: " + filteredEmployees.size() + " employees");
+        } catch (IllegalArgumentException e) {
+            System.out.println("❌ Invalid employment basis: " + employmentBasis);
+        }
+    }
+    
+    // Apply ongoing filter
+    if (ongoing != null) {
+        System.out.println("🔍 Filtering by ongoing status: " + ongoing);
+        
+        filteredEmployees = filteredEmployees.stream()
+                .filter(emp -> emp.isOngoing() == ongoing)
+                .collect(Collectors.toList());
+        
+        System.out.println("📊 After ongoing filter: " + filteredEmployees.size() + " employees");
+    }
+
+    // Apply sorting
+    Sort sort = createSort(sortBy, sortDirection);
+    System.out.println("📊 Applying sort: " + sort);
+    
+    // Sort the filtered list
+    if ("firstName".equals(sortBy)) {
+        filteredEmployees.sort((a, b) -> {
+            int result = a.getFirstName().compareToIgnoreCase(b.getFirstName());
+            return "desc".equalsIgnoreCase(sortDirection) ? -result : result;
+        });
+    } else if ("email".equals(sortBy)) {
+        filteredEmployees.sort((a, b) -> {
+            int result = a.getEmail().compareToIgnoreCase(b.getEmail());
+            return "desc".equalsIgnoreCase(sortDirection) ? -result : result;
+        });
+    } else if ("startDate".equals(sortBy)) {
+        filteredEmployees.sort((a, b) -> {
+            int result = a.getStartDate().compareTo(b.getStartDate());
+            return "desc".equalsIgnoreCase(sortDirection) ? -result : result;
+        });
+    }
+
+    System.out.println("🎯 Final result: " + filteredEmployees.size() + " employees");
+    return filteredEmployees.stream()
+            .map(this::convertToResponseDTO)
+            .collect(Collectors.toList());
+}
+
     /* --------------------------------- CREATE --------------------------------- */
     public EmployeeResponseDTO createEmployee(CreateEmployeeDTO data) {
         //create new emp entity
@@ -133,14 +246,33 @@ public class EmployeeService {
     public void delete(Long id) {
         // Check if employee exists
         Optional<Employee> employee = employeeRepository.findById(id);
-        
+
         if (employee.isEmpty()) {
             throw new RuntimeException("Employee with id " + id + " not found");
         }
-        
+
         // Delete the employee
         employeeRepository.deleteById(id);
     }
+
+        private Sort createSort(String sortBy, String sortDirection) {
+        // Default sorting if no parameters provided
+        if (sortBy == null || sortBy.trim().isEmpty()) {
+            return Sort.by(Sort.Direction.ASC, "firstName"); // Default: sort by firstName ascending
+        }
+
+        // Determine sort direction
+        Sort.Direction direction = Sort.Direction.ASC; // Default to ascending
+        if ("desc".equalsIgnoreCase(sortDirection)) {
+            direction = Sort.Direction.DESC;
+        }
+
+        // Create and return Sort object
+        return Sort.by(direction, sortBy);
+    }
+
+
+
 
     /* ------------------------------ HELPER METHOD ----------------------------- */
     // this is a helper method to convert an Employee entity to EmployeeResponseDTO

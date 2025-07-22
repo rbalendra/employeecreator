@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router'
 import { Button } from '../components/Button'
 import { EmployeeCard } from '../components/EmployeeCard'
 import { EmployeeDetailsModal } from '../components/EmployeeDetailsModal'
 import {
 	getAllEmployees,
+	searchEmployees,
 	deleteEmployee,
 	type Employee,
+	type EmployeeSearchParams,
 } from '../services/employees'
 import {
 	MdPeople,
@@ -20,14 +22,14 @@ export const EmployeesPage = () => {
 	const navigate = useNavigate()
 
 	// State management
-	const [employees, setEmployees] = useState<Employee[]>([]) // All employees from API
-	const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]) // search/filter/sort
+	const [employees, setEmployees] = useState<Employee[]>([]) // Current displayed employees
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 	const [searchTerm, setSearchTerm] = useState('')
-	const [contractFilter, setContractFilter] = useState<string>('ALL') // contract type filter
-	const [employmentFilter, setEmploymentFilter] = useState<string>('ALL') // employment basis filter
-	const [sortBy, setSortBy] = useState<string>('name') // field to sort by
+	const [contractFilter, setContractFilter] = useState<string>('ALL')
+	const [employmentFilter, setEmploymentFilter] = useState<string>('ALL')
+	const [sortBy, setSortBy] = useState<string>('firstName') // Changed to match backend field
+	const [sortDirection, setSortDirection] = useState<string>('asc')
 
 	// Modal state
 	const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
@@ -35,79 +37,90 @@ export const EmployeesPage = () => {
 	)
 	const [isModalOpen, setIsModalOpen] = useState(false)
 
-	/* -------------------------------------------------------------------------- */
-	// Fetch all employees on component mount
-	useEffect(() => {
-		const fetchEmployees = async () => {
-			try {
-				setLoading(true)
-				console.log('🔄 Loading employees...')
-				const employeeData = await getAllEmployees() // API call
-				setEmployees(employeeData) // save full list
-				setFilteredEmployees(employeeData) // initialise filtered list
-				console.log('✅ Employees loaded successfully:', employeeData.length)
-			} catch (err) {
-				console.error('❌ Error loading employees:', err)
-				setError('Failed to load employees')
-			} finally {
-				setLoading(false)
+	/* ---------------------------- SEARCH EMPLOYEES ---------------------------- */
+	// Debounced search function to avoid too many API calls
+	const performSearch = useCallback(async () => {
+		try {
+			setLoading(true)
+			setError(null) // Clear any previous errors
+			console.log('🔍 Performing backend search...')
+			console.log('Current state:', {
+				searchTerm,
+				contractFilter,
+				employmentFilter,
+				sortBy,
+				sortDirection,
+			})
+
+			// If no filters are applied, get all employees
+			if (
+				!searchTerm &&
+				contractFilter === 'ALL' &&
+				employmentFilter === 'ALL'
+			) {
+				console.log('📋 Getting all employees...')
+				const allEmployees = await getAllEmployees()
+				console.log('✅ Got all employees:', allEmployees.length)
+				setEmployees(allEmployees)
+			} else {
+				// Use backend search with current filters
+				console.log('🔍 Using backend search with filters')
+
+				const searchParams: EmployeeSearchParams = {
+					contractType: contractFilter !== 'ALL' ? contractFilter : undefined,
+					employmentBasis:
+						employmentFilter !== 'ALL' ? employmentFilter : undefined,
+					sortBy: sortBy,
+					sortDirection: sortDirection,
+				}
+
+				// Add search term if provided
+				if (searchTerm && searchTerm.trim()) {
+					searchParams.searchTerm = searchTerm.trim()
+				}
+
+				console.log('📤 Sending search params:', searchParams)
+				const searchResults = await searchEmployees(searchParams)
+				console.log('✅ Got search results:', searchResults.length)
+				setEmployees(searchResults)
 			}
-		}
 
-		fetchEmployees()
-	}, [])
-	/* -------------------------------------------------------------------------- */
-	// Filter and sort employees when filters change
+			console.log('✅ Search completed successfully')
+		} catch (err) {
+			console.error('❌ Error searching employees:', err)
+			setError(
+				`Failed to search employees: ${
+					err instanceof Error ? err.message : 'Unknown error'
+				}`
+			)
+		} finally {
+			console.log('🔄 Setting loading to false')
+			setLoading(false)
+		}
+	}, [searchTerm, contractFilter, employmentFilter, sortBy, sortDirection])
+
+	/* --------------------------- INITIAL DATA LOAD ---------------------------- */
+	// Load employees when component mounts
 	useEffect(() => {
-		let filtered = [...employees] // copy into filtered variable
+		console.log('🚀 Component mounted, triggering initial search')
+		performSearch()
+	}, []) // Remove performSearch from dependencies to avoid infinite loop
 
-		// Apply search filter
-		if (searchTerm) {
-			filtered = filtered.filter(
-				(emp) =>
-					emp.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-					emp.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-					emp.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-					emp.mobileNumber.includes(searchTerm)
-			)
+	/* -------------------------- SEARCH WHEN FILTERS CHANGE ------------------- */
+	// Trigger search when filters change (with debounce)
+	useEffect(() => {
+		console.log('🔄 Filters changed, scheduling search...')
+		const timer = setTimeout(() => {
+			performSearch()
+		}, 300) // 300ms debounce
+
+		return () => {
+			console.log('🧹 Cleaning up search timer')
+			clearTimeout(timer)
 		}
+	}, [searchTerm, contractFilter, employmentFilter, sortBy, sortDirection])
 
-		// Apply contract type filter
-		if (contractFilter !== 'ALL') {
-			filtered = filtered.filter((emp) => emp.contractType === contractFilter)
-		}
-
-		// Apply employment basis filter
-		if (employmentFilter !== 'ALL') {
-			filtered = filtered.filter(
-				(emp) => emp.employmentBasis === employmentFilter
-			)
-		}
-
-		// Apply sorting
-		filtered.sort((a, b) => {
-			switch (sortBy) {
-				case 'name':
-					return `${a.firstName} ${a.lastName}`.localeCompare(
-						`${b.firstName} ${b.lastName}`
-					)
-				case 'email':
-					return a.email.localeCompare(b.email)
-				case 'startDate':
-					return (
-						new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
-					)
-				case 'contractType':
-					return a.contractType.localeCompare(b.contractType)
-				default:
-					return 0
-			}
-		})
-
-		setFilteredEmployees(filtered) //update UI list
-	}, [employees, searchTerm, contractFilter, employmentFilter, sortBy])
-	/* -------------------------------------------------------------------------- */
-
+	/* ----------------------------- HANDLER FUNCTIONS ----------------------------- */
 	// Handle employee deletion
 	const handleDeleteEmployee = async (employeeId: number) => {
 		const employee = employees.find((emp) => emp.id === employeeId)
@@ -120,13 +133,10 @@ export const EmployeesPage = () => {
 		if (confirmDelete) {
 			try {
 				console.log('Deleting employee:', employeeId)
-				await deleteEmployee(employeeId) //update db
+				await deleteEmployee(employeeId)
 
-				// Update local state by removing the deleted employee
-				const updatedEmployees = employees.filter(
-					(emp) => emp.id !== employeeId
-				)
-				setEmployees(updatedEmployees)
+				// Refresh the search results after deletion
+				performSearch()
 
 				console.log('✅ Employee deleted successfully')
 				alert('Employee deleted successfully!')
@@ -161,11 +171,39 @@ export const EmployeesPage = () => {
 		setSearchTerm('')
 		setContractFilter('ALL')
 		setEmploymentFilter('ALL')
-		setSortBy('name')
+		setSortBy('firstName')
+		setSortDirection('asc')
 	}
 
+	// Convert sortBy display value to backend field name
+	const getSortFieldName = (displayValue: string): string => {
+		switch (displayValue) {
+			case 'name':
+				return 'firstName'
+			case 'email':
+				return 'email'
+			case 'startDate':
+				return 'startDate'
+			default:
+				return 'firstName'
+		}
+	}
+
+	// Handle sort change
+	const handleSortChange = (newSortBy: string) => {
+		const fieldName = getSortFieldName(newSortBy)
+		setSortBy(fieldName)
+		// Keep current direction when changing sort field
+	}
+
+	// Toggle sort direction
+	const toggleSortDirection = () => {
+		setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+	}
+
+	/* ------------------------------- RENDER UI -------------------------------- */
 	// Show loading state
-	if (loading) {
+	if (loading && employees.length === 0) {
 		return (
 			<div className='min-h-screen bg-gray-50 flex items-center justify-center'>
 				<div className='text-center'>
@@ -236,9 +274,9 @@ export const EmployeesPage = () => {
 
 					{/* Filters and Search */}
 					<div className='p-6 bg-gray-50 border-b border-gray-200'>
-						<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4'>
+						<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
 							{/* Search Bar */}
-							<div className='lg:col-span-2'>
+							<div className='lg:col-span-1'>
 								<div className='relative'>
 									<div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
 										<MdSearch className='h-4 w-4 text-gray-400' />
@@ -247,8 +285,8 @@ export const EmployeesPage = () => {
 										type='text'
 										value={searchTerm}
 										onChange={(e) => setSearchTerm(e.target.value)}
-										className='block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm'
-										placeholder='Search employees...'
+										className='block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm'
+										placeholder='Search by name...'
 									/>
 								</div>
 							</div>
@@ -258,7 +296,7 @@ export const EmployeesPage = () => {
 								<select
 									value={contractFilter}
 									onChange={(e) => setContractFilter(e.target.value)}
-									className='block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm'>
+									className='block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm'>
 									<option value='ALL'>All Contract Types</option>
 									<option value='PERMANENT'>Permanent</option>
 									<option value='CONTRACT'>Contract</option>
@@ -270,7 +308,7 @@ export const EmployeesPage = () => {
 								<select
 									value={employmentFilter}
 									onChange={(e) => setEmploymentFilter(e.target.value)}
-									className='block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm'>
+									className='block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm'>
 									<option value='ALL'>All Employment Types</option>
 									<option value='FULL_TIME'>Full Time</option>
 									<option value='PART_TIME'>Part Time</option>
@@ -280,40 +318,53 @@ export const EmployeesPage = () => {
 							{/* Sort By */}
 							<div>
 								<select
-									value={sortBy}
-									onChange={(e) => setSortBy(e.target.value)}
-									className='block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm'>
+									value={sortBy === 'firstName' ? 'name' : sortBy}
+									onChange={(e) => handleSortChange(e.target.value)}
+									className='block w-full px-3 py-2 border border-gray-300 rounded-lg text-sm'>
 									<option value='name'>Sort by Name</option>
 									<option value='email'>Sort by Email</option>
 									<option value='startDate'>Sort by Start Date</option>
-									<option value='contractType'>Sort by Contract Type</option>
 								</select>
 							</div>
 						</div>
 
-						{/* Filter Summary and Reset */}
+						{/* Filter Summary and Controls */}
 						<div className='flex items-center justify-between mt-4'>
 							<div className='text-sm text-gray-600'>
-								Showing {filteredEmployees.length} of {employees.length}{' '}
-								employees
+								{loading ? (
+									<span className='flex items-center gap-2'>
+										<div className='animate-spin rounded-full h-4 w-4 border-2 border-orange-500 border-t-transparent'></div>
+										Searching...
+									</span>
+								) : (
+									`Showing ${employees.length} employees`
+								)}
 							</div>
-							{(searchTerm ||
-								contractFilter !== 'ALL' ||
-								employmentFilter !== 'ALL' ||
-								sortBy !== 'name') && (
-								<Button variant='ghost' size='sm' onClick={resetFilters}>
-									<MdFilterList />
-									Reset Filters
+							<div className='flex items-center space-x-3'>
+								{/* Sort Direction Toggle */}
+								<Button variant='ghost' size='sm' onClick={toggleSortDirection}>
+									{sortDirection === 'asc' ? '↑ Ascending' : '↓ Descending'}
 								</Button>
-							)}
+
+								{/* Reset Filters */}
+								{(searchTerm ||
+									contractFilter !== 'ALL' ||
+									employmentFilter !== 'ALL' ||
+									sortBy !== 'firstName') && (
+									<Button variant='ghost' size='sm' onClick={resetFilters}>
+										<MdFilterList />
+										Reset Filters
+									</Button>
+								)}
+							</div>
 						</div>
 					</div>
 				</div>
 
 				{/* Employees Grid */}
-				{filteredEmployees.length > 0 ? (
+				{employees.length > 0 ? (
 					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-						{filteredEmployees.map((employee) => (
+						{employees.map((employee) => (
 							<EmployeeCard
 								key={employee.id}
 								employee={employee}
@@ -330,27 +381,29 @@ export const EmployeesPage = () => {
 							<MdPeople />
 						</div>
 						<h3 className='text-xl font-semibold text-gray-900 mb-2'>
-							{employees.length === 0
-								? 'No employees found'
-								: 'No employees match your filters'}
+							No employees found
 						</h3>
 						<p className='text-gray-600 mb-6'>
-							{employees.length === 0
-								? 'Get started by adding your first employee to the system'
-								: 'Try adjusting your search criteria or filters'}
+							{searchTerm ||
+							contractFilter !== 'ALL' ||
+							employmentFilter !== 'ALL'
+								? 'Try adjusting your search criteria or filters'
+								: 'Get started by adding your first employee to the system'}
 						</p>
 						<div className='flex justify-center space-x-3'>
-							{employees.length === 0 ? (
+							{searchTerm ||
+							contractFilter !== 'ALL' ||
+							employmentFilter !== 'ALL' ? (
+								<Button variant='ghost' onClick={resetFilters}>
+									<MdFilterList />
+									Clear Filters
+								</Button>
+							) : (
 								<Button
 									variant='secondary'
 									onClick={() => navigate('/add-employee')}>
 									<MdPersonAdd />
 									Add First Employee
-								</Button>
-							) : (
-								<Button variant='ghost' onClick={resetFilters}>
-									<MdFilterList />
-									Clear Filters
 								</Button>
 							)}
 						</div>

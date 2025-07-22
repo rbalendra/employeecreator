@@ -193,7 +193,7 @@ export const EmployeeDetailsModal = ({
 									<div>
 										<p className='text-sm text-gray-500'>Start Date</p>
 										<p className='font-medium'>
-											{new Date(employee.startDate).toLocaleDateString()}
+											{new Date(employee.startDate).toLocaleDateString('en-AU')}
 										</p>
 									</div>
 								</div>
@@ -204,7 +204,9 @@ export const EmployeeDetailsModal = ({
 										<div>
 											<p className='text-sm text-gray-500'>End Date</p>
 											<p className='font-medium'>
-												{new Date(employee.finishDate).toLocaleDateString()}
+												{new Date(employee.finishDate).toLocaleDateString(
+													'en-AU'
+												)}
 											</p>
 										</div>
 									</div>
