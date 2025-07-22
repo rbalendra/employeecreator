@@ -1,3 +1,4 @@
+// StatCard: reusable card to display a statistic with title, value, and icon
 interface StatCardProps {
 	title: string
 	value: number
@@ -15,14 +16,12 @@ export const StatCard = ({
 }: StatCardProps) => {
 	return (
 		<div
-			className={`${bgColor} rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer group`}>
+			className={`${bgColor} rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl/20 hover:border-rose-700 transition-all duration-300 cursor-pointer group`}>
 			{/* Card Header with Icon */}
 			<div className='flex items-center justify-between mb-4'>
-				<div className='text-3xl group-hover:scale-110 transition-transform duration-200'>
-					{icon}
-				</div>
+				<div className='text-3xl'>{icon}</div>
 				<div
-					className={`text-5xl font-bold ${textColor} group-hover:scale-110 transition-transform duration-200`}>
+					className={`text-5xl font-bold ${textColor} group-hover:scale-150 transition-transform duration-200`}>
 					{value}
 				</div>
 			</div>
@@ -31,6 +30,7 @@ export const StatCard = ({
 			<div>
 				<h3
 					className={`text-sm font-bold uppercase tracking-wider ${
+						// If background uses bright or gradient classes, use black title for contrast
 						bgColor.includes('gradient') ||
 						bgColor.includes('blue') ||
 						bgColor.includes('green') ||

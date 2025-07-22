@@ -6,7 +6,7 @@ interface ButtonProps {
 	size?: 'sm' | 'md' | 'lg'
 
 	// state prop
-	isActive?: boolean
+	isActive?: boolean   // is the button
 	disabled?: boolean
 
 	//behaviour prop
@@ -27,20 +27,19 @@ export const Button = ({
 	onClick,
 	className = '',
 }: ButtonProps) => {
-	// Base styles that apply to all buttons - modern, clean design
+	// Base styles that apply to all buttons
 	const baseStyles =
 		'flex items-center justify-center space-x-2 font-medium transition-all duration-150 focus:outline-none border-1  cursor-pointer'
 
-	// Size variations - clean, minimal padding
+	// Size variations
 	const sizeStyles = {
 		sm: 'px-3 py-1.5 text-sm rounded-lg',
 		md: 'px-4 py-2 text-sm rounded-lg',
 		lg: 'px-6 py-3 text-base rounded-lg',
 	}
 
-	// Modern variant styles - orange theme with clean aesthetics
+	// Modern variant styles
 	const variantStyles = {
-		// Primary: Bright orange for main actions
 		primary: isActive
 			? 'bg-orange-500 text-white border-orange-500 shadow-sm'
 			: 'bg-orange-500 hover:bg-orange-600 text-white border-orange-500 hover:border-orange-600 shadow-sm hover:shadow-md',
@@ -69,11 +68,11 @@ export const Button = ({
 			: 'bg-red-500 hover:bg-red-600 text-white border-red-500 hover:border-red-600 shadow-sm hover:shadow-md',
 	}
 
-	// Disabled styles override other styles when button is disabled
+	// Overwrite all other styles when disabled
 	const disabledStyles =
 		'opacity-50 cursor-not-allowed hover:bg-current hover:border-current hover:shadow-none'
 
-	// Combine all styles based on props
+	// Build the final class string based on prop values
 	const buttonClasses = `
         ${baseStyles}
         ${sizeStyles[size]}
@@ -81,7 +80,7 @@ export const Button = ({
         ${className}
     `.trim()
 
-	// Handle click events - only call onClick if button is not disabled
+	// Only fire onClick if not disabled
 	const handleClick = () => {
 		if (!disabled && onClick) {
 			onClick()

@@ -36,14 +36,15 @@ export const EmployeeDetailsModal = ({
 		}
 
 		return () => {
-			document.removeEventListener('keydown', handleEscape)
-			document.body.style.overflow = 'unset'
+			document.removeEventListener('keydown', handleEscape) //clean up listener
+			document.body.style.overflow = 'unset' // restore scrolling
 		}
 	}, [isOpen, onClose])
 
-	if (!isOpen || !employee) return null
+	if (!isOpen || !employee) return null //if modal close or no emp, render nothing
 
-	// Helper function to get initials for avatar fallback
+/* -------------------------------------------------------------------------- */
+	// Helper function to get initials for image avatar fallback
 	const getInitials = (firstName: string, lastName: string) => {
 		return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
 	}

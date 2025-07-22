@@ -3,7 +3,7 @@ import { Navbar } from './Navbar'
 
 // LAYOUT COMPONENT: This is a wrapper that puts the navbar on every page
 interface LayoutProps {
-	children: React.ReactNode 
+	children: React.ReactNode // whatever to display under the navbar
 }
 
 export const Layout = ({ children }: LayoutProps) => {
@@ -19,7 +19,7 @@ export const Layout = ({ children }: LayoutProps) => {
 	const currentPage = location.pathname.slice(1) || 'dashboard'
 
 	return (
-		// MAIN CONTAINER: This div wraps everything and sets the background color
+		// MAIN CONTAINER: full‑height background for all pages
 		<div className='min-h-screen bg-gray-50'>
 			{/* NAVBAR SECTION: The navigation bar that appears on every page */}
 			{/* We tell the navbar which page is currently active so it can highlight the right button */}

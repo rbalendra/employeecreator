@@ -17,7 +17,7 @@ export interface Employee {
 	thumbnailUrl?: string
 }
 
-// Interface for creating new employees (matches your CreateEmployeeDTO)
+// Interface for creating new employees (matches CreateEmployeeDTO)
 export interface CreateEmployeeDTO {
 	firstName: string
 	middleName?: string
@@ -34,7 +34,7 @@ export interface CreateEmployeeDTO {
 	thumbnailUrl?: string
 }
 
-// Interface for updating employees (matches your UpdateEmployeeDTO)
+// Interface for updating employees (matches UpdateEmployeeDTO)
 export interface UpdateEmployeeDTO {
 	firstName?: string
 	middleName?: string
@@ -58,7 +58,6 @@ export interface EmployeeSearchParams {
 	email?: string
 	contractType?: string
 	employmentBasis?: string
-	ongoing?: boolean
 	sortBy?: string
 	sortDirection?: string
 	searchTerm?: string
@@ -67,18 +66,14 @@ export interface EmployeeSearchParams {
 /* ---------------------------- GET ALL EMPLOYEES --------------------------- */
 // Fetch all employees from the backend
 export const getAllEmployees = async (): Promise<Employee[]> => {
-	console.log('🌐 Making API call to get all employees...')
 	try {
 		const response = await fetch(`${API_BASE_URL}/employees`)
-		console.log('📡 Response status:', response.status)
-
+		console.log('Response status:', response.status)
 		if (!response.ok) {
-			console.error('❌ Response not ok:', response.status, response.statusText)
 			throw new Error(`HTTP ${response.status}: Failed to fetch employees`)
 		}
 
 		const data = await response.json()
-		console.log('✅ Successfully fetched employees:', data.length)
 		return data
 	} catch (error) {
 		console.error('💥 Error in getAllEmployees:', error)
@@ -151,7 +146,6 @@ export const getDashboardStats = async () => {
 			.length,
 		contractCount: employees.filter((emp) => emp.contractType === 'CONTRACT')
 			.length,
-		ongoingCount: employees.filter((emp) => emp.ongoing).length,
 	}
 }
 
@@ -160,8 +154,6 @@ export const getDashboardStats = async () => {
 export const searchEmployees = async (
 	params: EmployeeSearchParams
 ): Promise<Employee[]> => {
-	console.log('🔍 Starting employee search with params:', params)
-
 	// Build query parameters
 	const searchParams = new URLSearchParams()
 
@@ -169,39 +161,28 @@ export const searchEmployees = async (
 	if (params.searchTerm && params.searchTerm.trim()) {
 		const term = params.searchTerm.trim()
 		searchParams.append('firstName', term) // Backend uses firstName param for name search
-		console.log('🔍 Added name search term:', term)
 	}
 
 	// Add dropdown filters
 	if (params.contractType && params.contractType !== 'ALL') {
 		searchParams.append('contractType', params.contractType)
-		console.log('🔍 Added contract filter:', params.contractType)
 	}
 	if (params.employmentBasis && params.employmentBasis !== 'ALL') {
 		searchParams.append('employmentBasis', params.employmentBasis)
-		console.log('🔍 Added employment filter:', params.employmentBasis)
-	}
-	if (params.ongoing !== undefined) {
-		searchParams.append('ongoing', params.ongoing.toString())
-		console.log('🔍 Added ongoing filter:', params.ongoing)
 	}
 
 	// Add sorting
 	if (params.sortBy) {
 		searchParams.append('sortBy', params.sortBy)
-		console.log('🔍 Added sort field:', params.sortBy)
 	}
 	if (params.sortDirection) {
 		searchParams.append('sortDirection', params.sortDirection)
-		console.log('🔍 Added sort direction:', params.sortDirection)
 	}
 
 	const url = `${API_BASE_URL}/employees/search?${searchParams.toString()}`
-	console.log('🔍 Search URL:', url)
 
 	try {
 		const response = await fetch(url)
-		console.log('📡 Search response status:', response.status)
 
 		if (!response.ok) {
 			console.error(
@@ -213,10 +194,10 @@ export const searchEmployees = async (
 		}
 
 		const data = await response.json()
-		console.log('✅ Search results count:', data.length)
+		console.log('Search results count:', data.length)
 		return data
 	} catch (error) {
-		console.error('💥 Error in searchEmployees:', error)
+		console.error('Error in searchEmployees:', error)
 		throw error
 	}
 }

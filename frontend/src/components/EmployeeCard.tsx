@@ -14,7 +14,7 @@ export const EmployeeCard = ({
 	onDelete,
 	onView,
 }: EmployeeCardProps) => {
-	// Helper function to get initials for avatar fallback
+	// Helper function: build initials from first and last names
 	const getInitials = (firstName: string, lastName: string) => {
 		return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
 	}

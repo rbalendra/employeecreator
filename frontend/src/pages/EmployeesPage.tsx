@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router'
 import { Button } from '../components/Button'
 import { EmployeeCard } from '../components/EmployeeCard'
 import { EmployeeDetailsModal } from '../components/EmployeeDetailsModal'
+
 import {
 	getAllEmployees,
 	searchEmployees,
@@ -10,6 +11,7 @@ import {
 	type Employee,
 	type EmployeeSearchParams,
 } from '../services/employees'
+
 import {
 	MdPeople,
 	MdPersonAdd,
@@ -26,10 +28,10 @@ export const EmployeesPage = () => {
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 	const [searchTerm, setSearchTerm] = useState('')
-	const [contractFilter, setContractFilter] = useState<string>('ALL')
-	const [employmentFilter, setEmploymentFilter] = useState<string>('ALL')
-	const [sortBy, setSortBy] = useState<string>('firstName') // Changed to match backend field
-	const [sortDirection, setSortDirection] = useState<string>('asc')
+	const [contractFilter, setContractFilter] = useState<string>('ALL') //filter contract type
+	const [employmentFilter, setEmploymentFilter] = useState<string>('ALL') //filter full/part time
+	const [sortBy, setSortBy] = useState<string>('firstName') // field to sort by
+	const [sortDirection, setSortDirection] = useState<string>('asc') // asc & desc
 
 	// Modal state
 	const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
@@ -38,19 +40,12 @@ export const EmployeesPage = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false)
 
 	/* ---------------------------- SEARCH EMPLOYEES ---------------------------- */
-	// Debounced search function to avoid too many API calls
+	// performSearch: a stable function to fetch and apply filters/sorting
+	// useCallback ensures the function reference changes only when its dependencies (filters, searchTerm, etc.) change
 	const performSearch = useCallback(async () => {
 		try {
 			setLoading(true)
 			setError(null) // Clear any previous errors
-			console.log('🔍 Performing backend search...')
-			console.log('Current state:', {
-				searchTerm,
-				contractFilter,
-				employmentFilter,
-				sortBy,
-				sortDirection,
-			})
 
 			// If no filters are applied, get all employees
 			if (
@@ -58,14 +53,11 @@ export const EmployeesPage = () => {
 				contractFilter === 'ALL' &&
 				employmentFilter === 'ALL'
 			) {
-				console.log('📋 Getting all employees...')
+				console.log('Getting all employees...')
 				const allEmployees = await getAllEmployees()
-				console.log('✅ Got all employees:', allEmployees.length)
 				setEmployees(allEmployees)
 			} else {
 				// Use backend search with current filters
-				console.log('🔍 Using backend search with filters')
-
 				const searchParams: EmployeeSearchParams = {
 					contractType: contractFilter !== 'ALL' ? contractFilter : undefined,
 					employmentBasis:
@@ -78,44 +70,41 @@ export const EmployeesPage = () => {
 				if (searchTerm && searchTerm.trim()) {
 					searchParams.searchTerm = searchTerm.trim()
 				}
-
-				console.log('📤 Sending search params:', searchParams)
 				const searchResults = await searchEmployees(searchParams)
-				console.log('✅ Got search results:', searchResults.length)
 				setEmployees(searchResults)
 			}
-
-			console.log('✅ Search completed successfully')
 		} catch (err) {
-			console.error('❌ Error searching employees:', err)
+			console.error('Error searching employees:', err)
 			setError(
 				`Failed to search employees: ${
 					err instanceof Error ? err.message : 'Unknown error'
 				}`
 			)
 		} finally {
-			console.log('🔄 Setting loading to false')
+			console.log('Setting loading to false')
 			setLoading(false)
 		}
 	}, [searchTerm, contractFilter, employmentFilter, sortBy, sortDirection])
+	// Dependencies array: only create a new version of this function if any of these values change,
 
 	/* --------------------------- INITIAL DATA LOAD ---------------------------- */
-	// Load employees when component mounts
+	// On first mount, trigger performSearch once
 	useEffect(() => {
-		console.log('🚀 Component mounted, triggering initial search')
 		performSearch()
-	}, []) // Remove performSearch from dependencies to avoid infinite loop
+	}, []) //excluded dependancy to avoid inifite loops
 
 	/* -------------------------- SEARCH WHEN FILTERS CHANGE ------------------- */
-	// Trigger search when filters change (with debounce)
+	// Debounce search calls: wait 300ms after last filter/searchTerm update
+	// This prevents rapid API calls while the user types or toggles filters
+	// if user type "john" without debounce it would trigger 4 API calls (j, jo, joh, john)
 	useEffect(() => {
 		console.log('🔄 Filters changed, scheduling search...')
 		const timer = setTimeout(() => {
 			performSearch()
-		}, 300) // 300ms debounce
+		}, 300) // 300ms debounce: meaning search only triggers if the user stops typing for 300 secs
 
 		return () => {
-			console.log('🧹 Cleaning up search timer')
+			console.log('Cleaning up search timer')
 			clearTimeout(timer)
 		}
 	}, [searchTerm, contractFilter, employmentFilter, sortBy, sortDirection])
@@ -134,10 +123,8 @@ export const EmployeesPage = () => {
 			try {
 				console.log('Deleting employee:', employeeId)
 				await deleteEmployee(employeeId)
-
 				// Refresh the search results after deletion
-				performSearch()
-
+				await performSearch()
 				console.log('✅ Employee deleted successfully')
 				alert('Employee deleted successfully!')
 			} catch (err) {
@@ -149,13 +136,11 @@ export const EmployeesPage = () => {
 
 	// Handle employee editing (navigate to edit page)
 	const handleEditEmployee = (employee: Employee) => {
-		console.log('✏️ Edit employee:', employee)
 		navigate(`/edit-employee/${employee.id}`)
 	}
 
 	// Handle employee viewing (show modal)
 	const handleViewEmployee = (employee: Employee) => {
-		console.log('👁️ View employee details:', employee)
 		setSelectedEmployee(employee)
 		setIsModalOpen(true)
 	}
@@ -175,7 +160,7 @@ export const EmployeesPage = () => {
 		setSortDirection('asc')
 	}
 
-	// Convert sortBy display value to backend field name
+	// Map display sort options to backend field names
 	const getSortFieldName = (displayValue: string): string => {
 		switch (displayValue) {
 			case 'name':
@@ -193,7 +178,6 @@ export const EmployeesPage = () => {
 	const handleSortChange = (newSortBy: string) => {
 		const fieldName = getSortFieldName(newSortBy)
 		setSortBy(fieldName)
-		// Keep current direction when changing sort field
 	}
 
 	// Toggle sort direction
@@ -242,10 +226,10 @@ export const EmployeesPage = () => {
 			<div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
 				{/* Page Header */}
 				<div className='bg-white rounded-lg shadow-sm border border-gray-200 mb-6'>
-					<div className='px-6 py-4 border-b border-gray-200 bg-orange-50'>
+					<div className='px-6 py-4 border-b border-gray-200 bg-slate-100'>
 						<div className='flex items-center justify-between'>
 							<div className='flex items-center space-x-3'>
-								<div className='text-2xl text-orange-500'>
+								<div className='text-2xl text-rose-500'>
 									<MdPeople />
 								</div>
 								<div>

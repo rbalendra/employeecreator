@@ -4,8 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
+
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -33,14 +32,7 @@ public List<EmployeeResponseDTO> advancedSearch(
             String sortBy,
             String sortDirection
 ) {
-    System.out.println("🔍 AdvancedSearch called with:");
-    System.out.println("  firstName: " + firstName);
-    System.out.println("  lastName: " + lastName);
-    System.out.println("  contractType: " + contractType);
-    System.out.println("  employmentBasis: " + employmentBasis);
-    System.out.println("  ongoing: " + ongoing);
-    System.out.println("  sortBy: " + sortBy);
-    System.out.println("  sortDirection: " + sortDirection);
+    
 
     // Start with all employees
     List<Employee> allEmployees = employeeRepository.findAll();
@@ -49,7 +41,6 @@ public List<EmployeeResponseDTO> advancedSearch(
     // Apply search filter first (search by name only)
     if (firstName != null && !firstName.trim().isEmpty()) {
         String searchTerm = firstName.trim().toLowerCase();
-        System.out.println("🔍 Filtering by name search term: " + searchTerm);
         
         filteredEmployees = filteredEmployees.stream()
                 .filter(emp -> 
@@ -58,22 +49,20 @@ public List<EmployeeResponseDTO> advancedSearch(
                 )
                 .collect(Collectors.toList());
         
-        System.out.println("📊 After name search: " + filteredEmployees.size() + " employees");
     }
 
     // Apply contract type filter
     if (contractType != null && !"ALL".equals(contractType)) {
         try {
             ContractType filterType = ContractType.valueOf(contractType);
-            System.out.println("🔍 Filtering by contract type: " + filterType);
             
             filteredEmployees = filteredEmployees.stream()
                     .filter(emp -> emp.getContractType() == filterType)
                     .collect(Collectors.toList());
             
-            System.out.println("📊 After contract filter: " + filteredEmployees.size() + " employees");
+            
         } catch (IllegalArgumentException e) {
-            System.out.println("❌ Invalid contract type: " + contractType);
+            System.out.println("Invalid contract type: " + contractType);
         }
     }
     
@@ -81,32 +70,27 @@ public List<EmployeeResponseDTO> advancedSearch(
     if (employmentBasis != null && !"ALL".equals(employmentBasis)) {
         try {
             EmploymentBasis filterBasis = EmploymentBasis.valueOf(employmentBasis);
-            System.out.println("🔍 Filtering by employment basis: " + filterBasis);
             
             filteredEmployees = filteredEmployees.stream()
                     .filter(emp -> emp.getEmploymentBasis() == filterBasis)
                     .collect(Collectors.toList());
             
-            System.out.println("📊 After employment filter: " + filteredEmployees.size() + " employees");
         } catch (IllegalArgumentException e) {
-            System.out.println("❌ Invalid employment basis: " + employmentBasis);
+            System.out.println("Invalid employment basis: " + employmentBasis);
         }
     }
     
     // Apply ongoing filter
     if (ongoing != null) {
-        System.out.println("🔍 Filtering by ongoing status: " + ongoing);
         
         filteredEmployees = filteredEmployees.stream()
                 .filter(emp -> emp.isOngoing() == ongoing)
                 .collect(Collectors.toList());
-        
-        System.out.println("📊 After ongoing filter: " + filteredEmployees.size() + " employees");
+
     }
 
     // Apply sorting
     Sort sort = createSort(sortBy, sortDirection);
-    System.out.println("📊 Applying sort: " + sort);
     
     // Sort the filtered list
     if ("firstName".equals(sortBy)) {
@@ -126,7 +110,6 @@ public List<EmployeeResponseDTO> advancedSearch(
         });
     }
 
-    System.out.println("🎯 Final result: " + filteredEmployees.size() + " employees");
     return filteredEmployees.stream()
             .map(this::convertToResponseDTO)
             .collect(Collectors.toList());
@@ -189,7 +172,6 @@ public List<EmployeeResponseDTO> advancedSearch(
     /* ------------------------------- UPDATE ONE ------------------------------- */
     public EmployeeResponseDTO update(Long id, UpdateEmployeeDTO data) {
         // Find existing employee
-        // CHANGE: Use findById() instead of findAllById() - findById() returns Optional<Employee>, findAllById() takes Iterable<Long>
         Employee employeeToUpdate = employeeRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Employee with id " + id + " not found"));
         

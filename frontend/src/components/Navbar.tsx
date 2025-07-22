@@ -1,7 +1,8 @@
-import { Link, useNavigate } from 'react-router' // Import React Router hooks
+import { Link, useNavigate } from 'react-router'
 import { Button } from './Button'
 import { MdDashboard, MdPeople, MdPersonAdd, MdBusiness } from 'react-icons/md'
 
+//which page is currently active (to highlight the correct button)
 interface NavbarProps {
 	currentPage?: string
 }
@@ -31,34 +32,36 @@ export const Navbar = ({ currentPage = 'dashboard' }: NavbarProps) => {
 		},
 	]
 
-	// NAVIGATION HANDLER: Use React Router's navigate function
+	// call navigate with the given path when a nav item is clicked
 	const handleNavClick = (path: string) => {
 		navigate(path)
 	}
 
 	return (
+		// Navigation bar container: sticky top, white background, subtle shadow
 		<nav className='bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50'>
 			<div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
 				<div className='flex justify-between h-16'>
+					{/* Logo: links back to dashboard */}
 					<div className='flex items-center'>
 						<Link
 							to='/dashboard'
 							className='flex-shrink-0 flex items-center hover:opacity-80 transition-opacity'>
-							<div className='text-2xl mr-3 text-orange-500'>
+							<div className='text-2xl mr-3 text-rose-500'>
 								<MdBusiness />
 							</div>
 							<div>
 								<h1 className='text-xl font-bold text-gray-900'>
-									Employee Creator
+									Talent Forge
 								</h1>
 								<p className='text-xs text-gray-500 font-medium'>
-									CRM Dashboard
+									Employee Management Hub
 								</p>
 							</div>
 						</Link>
 					</div>
 
-					{/* NAVIGATION MENU: Using Router navigation */}
+					{/* Nav menu: loops through navItems */}
 					<div className='flex items-center space-x-1 gap-3'>
 						{navItems.map((item) => (
 							<Button

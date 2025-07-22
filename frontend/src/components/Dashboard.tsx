@@ -14,7 +14,6 @@ import {
 	MdSchedule,
 	MdBusiness,
 	MdDescription,
-	MdCheckCircle,
 	MdRefresh,
 	MdPersonAdd,
 	MdArrowForward,
@@ -28,7 +27,6 @@ export const Dashboard = () => {
 		partTimeCount: 0,
 		permanentCount: 0,
 		contractCount: 0,
-		ongoingCount: 0,
 	})
 
 	const [recentEmployees, setRecentEmployees] = useState<Employee[]>([])
@@ -41,7 +39,7 @@ export const Dashboard = () => {
 	)
 	const [isModalOpen, setIsModalOpen] = useState(false)
 
-	// Fetch dashboard data on component mount
+	/* ---------------  Fetch dashboard data on component mount --------------- */
 	useEffect(() => {
 		const fetchDashboardData = async () => {
 			try {
@@ -54,10 +52,10 @@ export const Dashboard = () => {
 					getAllEmployees(),
 				])
 
-				// Set statistics
+				// Update stats card numbers
 				setStats(dashboardStats)
 
-				// Get 6 most recent employees (by ID for now)
+				// Sort employees by ID descending, take top 6 for “recent”
 				const recent = allEmployees.sort((a, b) => b.id - a.id).slice(0, 6)
 				setRecentEmployees(recent)
 
@@ -73,7 +71,7 @@ export const Dashboard = () => {
 		fetchDashboardData()
 	}, [])
 
-	// Handle employee viewing (show modal)
+	/* ------------------ Handle employee viewing (show modal) ------------------ */
 	const handleViewEmployee = (employee: Employee) => {
 		console.log('👁️ View employee details:', employee)
 		setSelectedEmployee(employee)
@@ -86,12 +84,12 @@ export const Dashboard = () => {
 		setSelectedEmployee(null)
 	}
 
-	// Show loading state with modern spinner
+	/* ----------------------------- Loading status ----------------------------- */
 	if (loading) {
 		return (
 			<div className='min-h-screen bg-gray-50 flex items-center justify-center'>
 				<div className='text-center'>
-					<div className='inline-block animate-spin rounded-full h-8 w-8 border-2 border-orange-500 border-t-transparent mb-4'></div>
+					<div className='inline-block animate-spin rounded-full h-8 w-8 border-2 border-rose-500 border-t-transparent mb-4'></div>
 					<p className='text-gray-600 text-sm font-medium'>
 						Loading dashboard...
 					</p>
@@ -100,7 +98,7 @@ export const Dashboard = () => {
 		)
 	}
 
-	// Show error state with modern styling
+	/* --------------------------- Fetch error status --------------------------- */
 	if (error) {
 		return (
 			<div className='min-h-screen bg-gray-50 flex items-center justify-center'>
@@ -129,7 +127,7 @@ export const Dashboard = () => {
 					<div className='flex items-center justify-between'>
 						<div>
 							<h1 className='text-3xl font-bold text-gray-900 mb-2'>
-								Dashboard
+								DASHBOARD
 							</h1>
 							<p className='text-gray-600'>
 								Overview of your team and organisation
@@ -233,7 +231,7 @@ export const Dashboard = () => {
 				</div>
 			</div>
 
-			{/* Employee Details Modal */}
+			{/* Employee Details Modal When an Employee is Selected */}
 			<EmployeeDetailsModal
 				employee={selectedEmployee}
 				isOpen={isModalOpen}
