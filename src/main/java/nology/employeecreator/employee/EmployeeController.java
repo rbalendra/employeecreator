@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page; 
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,23 +36,38 @@ public class EmployeeController {
 
    /* ------------------------ SEARCH / FILTER ENDPOINT ------------------------ */
 @GetMapping("/search")
-public List<EmployeeResponseDTO> searchEmployees(
+public Page<EmployeeResponseDTO> searchEmployees(
     @RequestParam(required=false) String firstName,
-    @RequestParam(required=false) String lastName,
-    @RequestParam(required=false) String email,
     @RequestParam(required=false) String contractType,
     @RequestParam(required=false) String employmentBasis,
     @RequestParam(required=false) Boolean ongoing,
+        
+    // Sorting parameters
     @RequestParam(required = false, defaultValue = "firstName") String sortBy,
-    @RequestParam(required = false, defaultValue = "asc") String sortDirection
+    @RequestParam(required = false, defaultValue = "asc") String sortDirection,
+                    
+    // NEW: Pagination parameters
+    @RequestParam(required = false, defaultValue = "0") int page,      // Page number (0-based)
+    @RequestParam(required = false, defaultValue = "10") int size      // Items per page
+        
 ) {
-    System.out.println("GET /api/employees/search called");
-    return employeeService.advancedSearch(
-        firstName, lastName, email, contractType, 
-        employmentBasis, ongoing, sortBy, sortDirection
+     System.out.println("GET /api/employees/search called with pagination");
+        System.out.println("Page: " + page + ", Size: " + size + ", Sort: " + sortBy + " " + sortDirection);
+        System.out.println("Filters - firstName: " + firstName + ", contractType: " + contractType + 
+                          ", employmentBasis: " + employmentBasis + ", ongoing: " + ongoing);
+    
+    return employeeService.advancedSearchWithPagination(
+           firstName,          // Search term (works for both first and last name)
+            contractType,       // Contract type filter
+            employmentBasis,    // Employment basis filter
+            ongoing,            // Ongoing status filter
+            page,               // Page number
+            size,               // Page size
+            sortBy,             // Sort field
+            sortDirection       // Sort direction
     );
 }
-    
+  
 
 
 

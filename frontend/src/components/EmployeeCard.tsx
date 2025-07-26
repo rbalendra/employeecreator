@@ -1,3 +1,4 @@
+import { MdDelete, MdEdit, MdVisibility } from 'react-icons/md'
 import type { Employee } from '../services/employees'
 
 //props accepted by Employeecards
@@ -33,8 +34,59 @@ export const EmployeeCard = ({
 			: 'bg-orange-100 text-orange-800 border'
 	}
 
+	// Helper function to determine if employee is active
+	// BUSINESS LOGIC: ACTIVE = contract not expired, INACTIVE = contract expired
+	const getEmployeeStatus = () => {
+		const now = new Date()
+		const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+
+		// If there's a finish date, check if contract has expired
+		if (employee.finishDate) {
+			const finishDate = new Date(employee.finishDate)
+			const finishDateOnly = new Date(
+				finishDate.getFullYear(),
+				finishDate.getMonth(),
+				finishDate.getDate()
+			)
+
+			// Contract expired = INACTIVE, Contract still valid = ACTIVE
+			return finishDateOnly < today
+				? { isActive: false, label: 'INACTIVE' }
+				: { isActive: true, label: 'ACTIVE' }
+		}
+
+		// No finish date = ongoing contract = ACTIVE
+		return { isActive: true, label: 'ACTIVE' }
+	}
+
+	// Helper function to check if end date has elapsed
+	const isEndDateElapsed = () => {
+		if (!employee.finishDate) return false
+
+		const now = new Date()
+		const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+		const finishDate = new Date(employee.finishDate)
+		const finishDateOnly = new Date(
+			finishDate.getFullYear(),
+			finishDate.getMonth(),
+			finishDate.getDate()
+		)
+
+		return finishDateOnly < today
+	}
+
+	const employeeStatus = getEmployeeStatus()
+
+	// Helper function to get card styling based on employee status
+	const getCardStyling = () => {
+		return employeeStatus.isActive
+			? 'bg-white border-lime-400 hover:shadow-md hover:border-lime-600'
+			: 'bg-gray-50 border-red-400 hover:shadow-sm hover:border-red-600'
+	}
+
 	return (
-		<div className='bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow'>
+		<div
+			className={`rounded-lg shadow-sm border p-6 transition-shadow ${getCardStyling()}`}>
 			{/* Employee Header - Photo and Basic Info */}
 			<div className='flex items-start space-x-4'>
 				{/* Employee Avatar */}
@@ -80,6 +132,14 @@ export const EmployeeCard = ({
 						)}`}>
 						{employee.employmentBasis.replace('_', '-')}
 					</span>
+					<span
+						className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+							employeeStatus.isActive
+								? 'bg-green-100 text-green-800 border-green-800 border-1'
+								: 'bg-red-800 text-white border-red-800 border-1'
+						}`}>
+						{employeeStatus.label}
+					</span>
 				</div>
 
 				{/* Additional Info */}
@@ -90,7 +150,7 @@ export const EmployeeCard = ({
 					</p>
 					{employee.hoursPerWeek && <p>Hours/Week: {employee.hoursPerWeek}</p>}
 					{employee.finishDate && (
-						<p>
+						<p className={isEndDateElapsed() ? 'text-red-600 font-medium' : ''}>
 							End Date:{' '}
 							{new Date(employee.finishDate).toLocaleDateString('en-AU')}
 						</p>
@@ -104,21 +164,24 @@ export const EmployeeCard = ({
 					{onView && (
 						<button
 							onClick={() => onView(employee)}
-							className='text-blue-600 hover:text-blue-800 text-sm font-medium'>
+							className='flex items-center gap-1.5 px-3 py-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors text-sm font-medium'>
+							<MdVisibility className='w-4 h-4' />
 							View
 						</button>
 					)}
 					{onEdit && (
 						<button
 							onClick={() => onEdit(employee)}
-							className='text-green-600 hover:text-green-800 text-sm font-medium'>
-							Edit
+							className='flex items-center gap-1.5 px-3 py-1.5 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors text-sm font-medium'>
+							<MdEdit className='w-4 h-4' />
+							Update
 						</button>
 					)}
 					{onDelete && (
 						<button
 							onClick={() => onDelete(employee.id)}
-							className='text-red-600 hover:text-red-800 text-sm font-medium '>
+							className='flex items-center gap-1.5 px-3 py-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors text-sm font-medium'>
+							<MdDelete className='w-4 h-4' />
 							Delete
 						</button>
 					)}

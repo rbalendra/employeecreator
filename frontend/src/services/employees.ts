@@ -51,17 +51,35 @@ export interface UpdateEmployeeDTO {
 	thumbnailUrl?: string
 }
 
+/* ------------------------ NEW: PAGINATION INTERFACES ----------------------- */
+export interface PagedResponse<T> {
+	content: T[] // Array of items for current page
+	totalElements: number // Total number of items across all pages
+	totalPages: number // Total number of pages
+	number: number // Current page number (0-based)
+	size: number // Number of items per page
+	first: boolean // Is this the first page?
+	last: boolean // Is this the last page?
+	numberOfElements: number // Number of items in current page
+}
+
 /* ------------------------ SEARCH/FILTER INTERFACE ----------------------- */
-export interface EmployeeSearchParams {
+export interface SearchParams {
 	firstName?: string
 	lastName?: string
 	email?: string
 	contractType?: string
 	employmentBasis?: string
+	status?: string
 	sortBy?: string
 	sortDirection?: string
 	searchTerm?: string
+	page?: number // Page number (0-based)
+	size?: number // Items per page
 }
+
+// Alias for backward compatibility
+export type EmployeeSearchParams = SearchParams
 
 /* ---------------------------- GET ALL EMPLOYEES --------------------------- */
 // Fetch all employees from the backend
@@ -149,15 +167,14 @@ export const getDashboardStats = async () => {
 	}
 }
 
-/* ------------------------ SEARCH EMPLOYEES WITH BACKEND ------------------- */
-// Search employees with various filters
+/* ------------------------ UPDATED: PAGINATED SEARCH ------------------- */
 export const searchEmployees = async (
-	params: EmployeeSearchParams
-): Promise<Employee[]> => {
-	// Build query parameters
+	params: SearchParams
+): Promise<PagedResponse<Employee>> => {
+	// Build query parameters including pagination
 	const searchParams = new URLSearchParams()
 
-	// Handle search term - only search by name now
+	// Handle search term - search by name
 	if (params.searchTerm && params.searchTerm.trim()) {
 		const term = params.searchTerm.trim()
 		searchParams.append('firstName', term) // Backend uses firstName param for name search
@@ -171,13 +188,29 @@ export const searchEmployees = async (
 		searchParams.append('employmentBasis', params.employmentBasis)
 	}
 
-	// Add sorting
+	// Add status filter - send ongoing parameter to backend
+	// Backend logic:
+	// - ACTIVE (ongoing=true): employees with ongoing=true AND (no finish date OR finish date >= today)
+	// - INACTIVE (ongoing=false): employees with ongoing=false OR finish date < today
+	if (params.status && params.status !== 'ALL') {
+		if (params.status === 'ACTIVE') {
+			searchParams.append('ongoing', 'true') // Active employees
+		} else if (params.status === 'INACTIVE') {
+			searchParams.append('ongoing', 'false') // Inactive employees
+		}
+	}
+
+	// Add sorting parameters
 	if (params.sortBy) {
 		searchParams.append('sortBy', params.sortBy)
 	}
 	if (params.sortDirection) {
 		searchParams.append('sortDirection', params.sortDirection)
 	}
+
+	// Add pagination parameters (with defaults)
+	searchParams.append('page', String(params.page || 0))
+	searchParams.append('size', String(params.size || 10))
 
 	const url = `${API_BASE_URL}/employees/search?${searchParams.toString()}`
 
@@ -193,11 +226,91 @@ export const searchEmployees = async (
 			throw new Error(`HTTP ${response.status}: Failed to search employees`)
 		}
 
-		const data = await response.json()
-		console.log('Search results count:', data.length)
+		const data: PagedResponse<Employee> = await response.json()
+		console.log(
+			'📄 Search results - Page:',
+			data.number + 1,
+			'of',
+			data.totalPages,
+			'| Items:',
+			data.numberOfElements,
+			'of',
+			data.totalElements
+		)
 		return data
 	} catch (error) {
 		console.error('Error in searchEmployees:', error)
+		throw error
+	}
+}
+
+/* ----------------------- SIMPLE SEARCH (NO PAGINATION) ------------------- */
+// This function returns Employee[] for backward compatibility with current frontend
+export const searchEmployeesSimple = async (
+	params: EmployeeSearchParams
+): Promise<Employee[]> => {
+	// Build query parameters
+	const searchParams = new URLSearchParams()
+
+	// Handle search term - search by name
+	if (params.searchTerm && params.searchTerm.trim()) {
+		const term = params.searchTerm.trim()
+		searchParams.append('firstName', term) // Backend uses firstName param for name search
+	}
+
+	// Add dropdown filters
+	if (params.contractType && params.contractType !== 'ALL') {
+		searchParams.append('contractType', params.contractType)
+	}
+	if (params.employmentBasis && params.employmentBasis !== 'ALL') {
+		searchParams.append('employmentBasis', params.employmentBasis)
+	}
+
+	// Add status filter - send ongoing parameter to backend
+	// Backend logic:
+	// - ACTIVE (ongoing=true): employees with ongoing=true AND (no finish date OR finish date >= today)
+	// - INACTIVE (ongoing=false): employees with ongoing=false OR finish date < today
+	if (params.status && params.status !== 'ALL') {
+		if (params.status === 'ACTIVE') {
+			searchParams.append('ongoing', 'true') // Active employees
+		} else if (params.status === 'INACTIVE') {
+			searchParams.append('ongoing', 'false') // Inactive employees
+		}
+	}
+
+	// Add sorting parameters
+	if (params.sortBy) {
+		searchParams.append('sortBy', params.sortBy)
+	}
+	if (params.sortDirection) {
+		searchParams.append('sortDirection', params.sortDirection)
+	}
+
+	searchParams.append('page', '0')
+	searchParams.append('size', '100')
+
+	const url = `${API_BASE_URL}/employees/search?${searchParams.toString()}`
+	console.log('🔍 Searching with URL:', url)
+
+	try {
+		const response = await fetch(url)
+
+		if (!response.ok) {
+			console.error(
+				'❌ Search response not ok:',
+				response.status,
+				response.statusText
+			)
+			throw new Error(`HTTP ${response.status}: Failed to search employees`)
+		}
+
+		const data: PagedResponse<Employee> = await response.json()
+		console.log('✅ Search successful, found', data.content.length, 'employees')
+
+		// Return just the content array for backward compatibility
+		return data.content
+	} catch (error) {
+		console.error('💥 Error in searchEmployeesSimple:', error)
 		throw error
 	}
 }

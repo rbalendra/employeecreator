@@ -18,6 +18,7 @@ import {
 	MdPersonAdd,
 	MdArrowForward,
 } from 'react-icons/md'
+import { useNavigate } from 'react-router'
 
 export const Dashboard = () => {
 	// State for dashboard data
@@ -38,7 +39,7 @@ export const Dashboard = () => {
 		null
 	)
 	const [isModalOpen, setIsModalOpen] = useState(false)
-
+	const navigate = useNavigate()
 	/* ---------------  Fetch dashboard data on component mount --------------- */
 	useEffect(() => {
 		const fetchDashboardData = async () => {
@@ -191,7 +192,10 @@ export const Dashboard = () => {
 							<h2 className='text-lg font-semibold text-gray-900'>
 								Recent Employees
 							</h2>
-							<Button variant='ghost' size='sm'>
+							<Button
+								variant='ghost'
+								size='sm'
+								onClick={() => navigate('/employees')}>
 								<span>View All</span>
 								<MdArrowForward />
 							</Button>

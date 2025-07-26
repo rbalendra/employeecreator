@@ -3,8 +3,9 @@ package nology.employeecreator.employee;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -23,104 +24,122 @@ public class EmployeeService {
     }
     
     /* -------------------------- SEARCH FUNCTIONALITY -------------------------- */
-    //Performs an “advanced” in‑memory search over all employees,applying optional filters and sorting.
-public List<EmployeeResponseDTO> advancedSearch(
-            String firstName,
-            String lastName,
-            String email,
-            String contractType,
-            String employmentBasis,
-            Boolean ongoing,
-            String sortBy,
-            String sortDirection
-) {
-    
-
-
-
-
-    // Fetch everything from the database
-    List<Employee> allEmployees = employeeRepository.findAll();
-    List<Employee> filteredEmployees = allEmployees;
-
-          // Apply ongoing filter
-    if (ongoing != null) {
-        
-        filteredEmployees = filteredEmployees.stream()
-                .filter(emp -> emp.isOngoing() == ongoing)
-                .collect(Collectors.toList());
-
-    }
-
-
-    // Apply search filter first (search by firstname or last name)
-    if (firstName != null && !firstName.trim().isEmpty()) {
-        String searchTerm = firstName.trim().toLowerCase();
-        
-        filteredEmployees = filteredEmployees.stream()
-                .filter(emp -> 
-                    emp.getFirstName().toLowerCase().contains(searchTerm) ||
-                    emp.getLastName().toLowerCase().contains(searchTerm)
-                )
-                .collect(Collectors.toList());
-        
-    }
-
-    // Contract type filter: skip if ALL, otherwise parse to enum and filter
-    if (contractType != null && !"ALL".equals(contractType)) {
-        try {
-            ContractType filterType = ContractType.valueOf(contractType);
-            
-            filteredEmployees = filteredEmployees.stream()
-                    .filter(emp -> emp.getContractType() == filterType)
-                    .collect(Collectors.toList());
-            
-            
-        } catch (IllegalArgumentException e) {
-            System.out.println("Invalid contract type: " + contractType);
+    // Database-level search with pagination and sorting
+    public Page<EmployeeResponseDTO> advancedSearchWithPagination(
+            String firstName,           // Search term for name
+            String contractType,        // Filter: contract type
+            String employmentBasis,     // Filter: employment basis  
+            Boolean ongoing,            // Filter: ongoing status
+            int page,                   // Page number (0-based)
+            int size,                   // Number of items per page
+            String sortBy,              // Field to sort by
+            String sortDirection        // Sort direction: asc or desc
+    ) {
+        // Step 1: Convert string parameters to enums (with validation)
+        ContractType contractTypeEnum = null;
+        if (contractType != null && !"ALL".equals(contractType)) {
+            try {
+                contractTypeEnum = ContractType.valueOf(contractType);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Invalid contract type: " + contractType);
+            }
         }
-    }
-    
-    // Apply employment basis filter
-    if (employmentBasis != null && !"ALL".equals(employmentBasis)) {
-        try {
-            EmploymentBasis filterBasis = EmploymentBasis.valueOf(employmentBasis);
-            
-            filteredEmployees = filteredEmployees.stream()
-                    .filter(emp -> emp.getEmploymentBasis() == filterBasis)
-                    .collect(Collectors.toList());
-            
-        } catch (IllegalArgumentException e) {
-            System.out.println("Invalid employment basis: " + employmentBasis);
+
+        EmploymentBasis employmentBasisEnum = null;
+        if (employmentBasis != null && !"ALL".equals(employmentBasis)) {
+            try {
+                employmentBasisEnum = EmploymentBasis.valueOf(employmentBasis);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Invalid employment basis: " + employmentBasis);
+            }
         }
-    }
- 
 
-    
-    
-    // Perform the actual list sorting based on sortBy & sortDirection
-    if ("firstName".equals(sortBy)) {
-        filteredEmployees.sort((a, b) -> {
-            int result = a.getFirstName().compareToIgnoreCase(b.getFirstName());
-            return "desc".equalsIgnoreCase(sortDirection) ? -result : result;
-        });
-    } else if ("email".equals(sortBy)) {
-        filteredEmployees.sort((a, b) -> {
-            int result = a.getEmail().compareToIgnoreCase(b.getEmail());
-            return "desc".equalsIgnoreCase(sortDirection) ? -result : result;
-        });
-    } else if ("startDate".equals(sortBy)) {
-        filteredEmployees.sort((a, b) -> {
-            int result = a.getStartDate().compareTo(b.getStartDate());
-            return "desc".equalsIgnoreCase(sortDirection) ? -result : result;
-        });
+            // Convert ongoing boolean to isActive for repository
+        Boolean isActive = null;
+        if (ongoing != null) {
+            isActive = ongoing; // true = active, false = inactive
+            System.out.println("Converting ongoing=" + ongoing + " to isActive=" + isActive);
+        }
+        
+
+        // Step 2: Create Sort object for database-level sorting
+        Sort sort = createSort(sortBy, sortDirection);
+
+        // Step 3: Create Pageable object (combines pagination + sorting)
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        // Step 4: Execute database query with all filters, sorting, and pagination
+        Page<Employee> employeePage = employeeRepository.findWithFilters(
+                firstName, // Will search both firstName and lastName
+                contractTypeEnum, // null = no filter, value = exact match
+                employmentBasisEnum, // null = no filter, value = exact match  
+                isActive, 
+                pageable // Handles pagination + sorting
+        );
+
+        // Step 5: Convert Page<Employee> to Page<EmployeeResponseDTO>
+        // map() transforms each Employee entity to EmployeeResponseDTO
+        return employeePage.map(this::convertToResponseDTO);
     }
 
-    // Map each Employee entity to a response DTO for the client
-    return filteredEmployees.stream()
-            .map(this::convertToResponseDTO)
-            .collect(Collectors.toList());
-}
+/* ----------------------------- SORTING HELPERS ---------------------------- */
+private Sort createSort(String sortBy, String sortDirection) {
+        // Default sorting if no parameters provided
+    if (sortBy == null || sortBy.trim().isEmpty()) {
+            return Sort.by(Sort.Direction.ASC, "firstName");
+             // Default: sort by firstName ascending
+        }
+        
+        
+        // Validate sortBy field to prevent SQL injection
+        // Only allow specific database column names
+        String validatedSortBy;
+        switch (sortBy.toLowerCase()) {
+            case "firstname":
+            case "first_name":
+                validatedSortBy = "firstName";
+                break;
+            case "lastname": 
+            case "last_name":
+                validatedSortBy = "lastName";
+                break;
+            case "email":
+                validatedSortBy = "email";
+                break;
+            case "startdate":
+            case "start_date":
+                validatedSortBy = "startDate";
+                break;
+            case "contracttype":
+            case "contract_type":
+                validatedSortBy = "contractType";
+                break;
+            default:
+                validatedSortBy = "firstName"; // Fallback to safe default
+                System.out.println("Invalid sort field: " + sortBy + ", using firstName");
+        }
+
+        
+        // Determine sort direction (default to ascending)
+        Sort.Direction direction = Sort.Direction.ASC;
+        if ("desc".equalsIgnoreCase(sortDirection)) {
+            direction = Sort.Direction.DESC;
+        }
+
+        // Create and return Sort object that will be used in the SQL ORDER BY clause
+        return Sort.by(direction, validatedSortBy);
+    }
+
+
+
+
+
+
+
+
+
+
+
 
 /* --------------------------------- CREATE --------------------------------- */
     //Creates a new Employee record from the given DTO saves it to the database, and returns the saved data as a DTO.
@@ -245,22 +264,6 @@ public List<EmployeeResponseDTO> advancedSearch(
         employeeRepository.deleteById(id);
     }
 
-    /* ----------------------------- SORTING HELPERS ---------------------------- */
-        private Sort createSort(String sortBy, String sortDirection) {
-        // Default sorting if no parameters provided
-        if (sortBy == null || sortBy.trim().isEmpty()) {
-            return Sort.by(Sort.Direction.ASC, "firstName"); // Default: sort by firstName ascending
-        }
-
-        // Determine sort direction
-        Sort.Direction direction = Sort.Direction.ASC; // Default to ascending
-        if ("desc".equalsIgnoreCase(sortDirection)) {
-            direction = Sort.Direction.DESC;
-        }
-
-        // Create and return Sort object
-        return Sort.by(direction, sortBy);
-    }
 
 
 
