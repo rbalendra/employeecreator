@@ -97,9 +97,15 @@ public List<EmployeeResponseDTO> getAllEmployees() {
 
     /* --------------------------- GET /api/employees --------------------------- */
     @GetMapping("/{id}")
-    public EmployeeResponseDTO getEmployee(@PathVariable Long id) {
-        // get employee by ID, convert to DTO, return response
-        return this.employeeService.findById(id);
+    public ResponseEntity<EmployeeResponseDTO> getEmployee(@PathVariable Long id) {
+        try{
+            EmployeeResponseDTO employee = this.employeeService.findById(id);
+            return ResponseEntity.ok(employee); // return 200 OK with employee data
+        }catch (RuntimeException e) {
+            // If employee not found, service throws RuntimeException
+            // We catch it and return 404 Not Found instead of letting it become 500
+            return ResponseEntity.notFound().build();
+        }
     }
     
     /* --------------------------- PUT /api/employees/{id} ----------------------- */

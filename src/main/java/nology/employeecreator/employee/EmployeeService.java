@@ -130,17 +130,6 @@ private Sort createSort(String sortBy, String sortDirection) {
         return Sort.by(direction, validatedSortBy);
     }
 
-
-
-
-
-
-
-
-
-
-
-
 /* --------------------------------- CREATE --------------------------------- */
     //Creates a new Employee record from the given DTO saves it to the database, and returns the saved data as a DTO.
     public EmployeeResponseDTO createEmployee(CreateEmployeeDTO data) {
@@ -188,8 +177,8 @@ private Sort createSort(String sortBy, String sortDirection) {
         if (employee.isEmpty()) {
             throw new RuntimeException("Employee with id " + id + " not found");
         }
-        
-       
+
+
         // Convert found employee to response DTO
         return convertToResponseDTO(employee.get());
     }
