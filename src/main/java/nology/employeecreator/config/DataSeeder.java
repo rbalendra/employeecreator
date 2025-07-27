@@ -29,12 +29,12 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         // Only seed if database is empty
         if (employeeRepository.count() == 0) {
-            System.out.println("🌱 Seeding database with 20 employee records...");
+            System.out.println("🌱 Seeding database with 30 employee records...");
             
-            for (int i = 0; i < 20; i++) {
+            for (int i = 0; i < 30; i++) {
                 Employee employee = createFakeEmployee();
                 employeeRepository.save(employee);
                 System.out.println("✅ Created employee: " + employee.getFirstName() + " " + employee.getLastName());
