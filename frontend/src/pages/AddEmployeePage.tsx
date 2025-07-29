@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { employeeSchema, type EmployeeFormData } from './schema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { toast } from 'react-hot-toast'
 import {
 	createEmployee,
 	updateEmployee,
@@ -75,7 +76,7 @@ export const AddEmployeePage = () => {
 				console.log('✅ Employee data loaded for editing')
 			} catch (error) {
 				console.error('❌ Error loading employee data:', error)
-				alert('Failed to load employee data. Please try again.')
+				toast.error('Failed to load employee data. Please try again.')
 				navigate('/employees') // Redirect back if loading fails
 			} finally {
 				setLoading(false)
@@ -107,7 +108,9 @@ export const AddEmployeePage = () => {
 				}
 
 				await updateEmployee(Number(id), updateData)
-				alert('Employee updated successfully!')
+				toast.success(
+					`${data.firstName} ${data.lastName} updated successfully!`
+				)
 			} else {
 				// CREATE NEW EMPLOYEE
 				const employeeData: CreateEmployeeDTO = {
@@ -119,7 +122,7 @@ export const AddEmployeePage = () => {
 				}
 
 				await createEmployee(employeeData)
-				alert('Employee created successfully!')
+				toast.success('Employee created successfully!')
 				reset() // Only reset form when creating new employee
 			}
 
@@ -129,7 +132,7 @@ export const AddEmployeePage = () => {
 				`Error ${isEditing ? 'updating' : 'creating'} employee:`,
 				error
 			)
-			alert(
+			toast.error(
 				`Failed to ${
 					isEditing ? 'update' : 'create'
 				} employee. Please try again.`

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router'
 import { Button } from '../components/Button'
 import { EmployeeCard } from '../components/EmployeeCard'
 import { EmployeeDetailsModal } from '../components/EmployeeDetailsModal'
+import { toast } from 'react-hot-toast'
 
 import {
 	getAllEmployees,
@@ -101,14 +102,14 @@ export const EmployeesPage = () => {
 	// On first mount, trigger performSearch once
 	useEffect(() => {
 		performSearch()
-	}, []) //excluded dependancy to avoid inifite loops
+	}, [contractFilter, employmentFilter, statusFilter, sortBy, sortDirection])
 
 	/* -------------------------- SEARCH WHEN FILTERS CHANGE ------------------- */
 	// Debounce search calls: wait 300ms after last filter/searchTerm update
 	// This prevents rapid API calls while the user types or toggles filters
 	// if user type "john" without debounce it would trigger 4 API calls (j, jo, joh, john)
 	useEffect(() => {
-		console.log('🔄 Filters changed, scheduling search...')
+		console.log('Setting up search debounce for:', searchTerm)
 		const timer = setTimeout(() => {
 			performSearch()
 		}, 300) // 300ms debounce: meaning search only triggers if the user stops typing for 300 secs
@@ -117,14 +118,7 @@ export const EmployeesPage = () => {
 			console.log('Cleaning up search timer')
 			clearTimeout(timer)
 		}
-	}, [
-		searchTerm,
-		contractFilter,
-		employmentFilter,
-		sortBy,
-		sortDirection,
-		statusFilter,
-	])
+	}, [searchTerm]) // Only searchTerm triggers debounce
 
 	/* ----------------------------- HANDLER FUNCTIONS ----------------------------- */
 	// Handle employee deletion
@@ -143,7 +137,7 @@ export const EmployeesPage = () => {
 				// Refresh the search results after deletion
 				await performSearch()
 				console.log('✅ Employee deleted successfully')
-				alert('Employee deleted successfully!')
+				toast.success('Employee deleted successfully!')
 			} catch (err) {
 				console.error('❌ Error deleting employee:', err)
 				alert('Failed to delete employee. Please try again.')
