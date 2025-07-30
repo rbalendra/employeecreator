@@ -43,7 +43,7 @@ export const EmployeeDetailsModal = ({
 
 	if (!isOpen || !employee) return null //if modal close or no emp, render nothing
 
-/* -------------------------------------------------------------------------- */
+	/* -------------------------------------------------------------------------- */
 	// Helper function to get initials for image avatar fallback
 	const getInitials = (firstName: string, lastName: string) => {
 		return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
@@ -94,7 +94,7 @@ export const EmployeeDetailsModal = ({
 							<div className='flex-shrink-0'>
 								{employee.thumbnailUrl ? (
 									<img
-										className='h-30 w-30 rounded-full object-cover border-2 border-gray-200'
+										className='h-60 w-60 rounded-full object-cover border-2 border-gray-200'
 										src={employee.thumbnailUrl}
 										alt={`${employee.firstName} ${employee.lastName}`}
 									/>

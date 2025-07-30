@@ -14,13 +14,26 @@ import {
 import { MdArrowBack, MdPersonAdd, MdSave, MdEdit } from 'react-icons/md'
 import { Button } from '../components/Button'
 
+//Cloudinary import for profile images
+import { uploadUrl, uploadPreset, cloudName } from '../config/cloudinary'
+
 export const AddEmployeePage = () => {
+	// Extract navigation function and route parameters
 	const navigate = useNavigate()
 	const { id } = useParams<{ id: string }>() // Get employee ID from URL if editing
-	const isEditing = Boolean(id) // Check if we're in edit mode
+	const isEditing = Boolean(id) // Determine if we're in edit mode based on ID presence
+
+	// Loading state for async operations (fetching employee data for editing)
 	const [loading, setLoading] = useState(false)
 
-	// FORM SETUP: Initialize React Hook Form with validation and default values
+	/**
+	 * React Hook Form Configuration
+	 *
+	 * Sets up form handling with:
+	 * - Zod schema validation for type safety and validation rules
+	 * - Default values for all form fields
+	 * - Form state management (errors, submission state, etc.)
+	 */
 	const {
 		register,
 		handleSubmit,
@@ -46,7 +59,120 @@ export const AddEmployeePage = () => {
 		},
 	})
 
-	// LOAD EMPLOYEE DATA: If editing, fetch and populate the form
+	/**
+	 * Image Upload State Management
+	 *
+	 * These state variables handle the Cloudinary image upload process:
+	 * - uploading: Shows loading indicator during upload
+	 * - previewUrl: Stores the image URL for preview display
+	 */
+	const [uploading, setUploading] = useState(false)
+	const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+
+	/**
+	 * Handle profile photo upload to Cloudinary
+	 *
+	 * This function takes a file selected by the user, uploads it to Cloudinary
+	 * using their REST API, and updates the form with the resulting secure URL.
+	 * The upload uses an unsigned preset for security without exposing API secrets.
+	 *
+	 */
+	const uploadImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files?.[0]
+		console.log(file)
+		if (!file) return
+
+		// Validate file type - only allow image files
+		if (!file.type.startsWith('image/')) {
+			toast.error('Please select a valid image file (JPG, PNG, GIF, etc.)')
+			console.error('❌ Invalid file type:', file.type)
+			return
+		}
+
+		// Validate file size - limit to 5MB to prevent large uploads
+		const maxSize = 5 * 1024 * 1024 // 5MB in bytes
+		if (file.size > maxSize) {
+			toast.error('Image file size must be less than 5MB')
+			console.error('❌ File too large:', file.size, 'bytes')
+			return
+		}
+
+		setUploading(true) // Show loading indicator to user
+		console.log('📤 Starting upload to Cloudinary...')
+
+		try {
+			// Create a FormData object with the file and upload configuration
+			// This matches Cloudinary's expected format for unsigned uploads
+			const formData = new FormData()
+			formData.append('file', file) // The actual image file
+			formData.append('upload_preset', uploadPreset) // Your unsigned upload preset
+			formData.append('cloud_name', cloudName)
+			formData.append('resource_type', 'image') // Specify this is an image upload
+
+			// Parse the response from Cloudinary
+			const response = await fetch(uploadUrl, {
+				method: 'POST',
+				body: formData,
+			})
+
+			const data = await response.json()
+			console.log('📊 Response data:', data)
+
+			// Check if the upload was successful
+			if (response.ok && data.secure_url) {
+				console.log('✅ Upload successful! Image URL:', data.secure_url)
+
+				// Update the form field with the secure URL from Cloudinary
+				// This URL points to the uploaded image on Cloudinary's CDN
+				reset((prevData) => ({
+					...prevData,
+					thumbnailUrl: data.secure_url, // cloudinary URL stored in form
+				}))
+
+				// Set preview URL for immediate visual feedback
+				setPreviewUrl(data.secure_url)
+
+				toast.success('Profile photo uploaded successfully!')
+				console.log('✅ Image uploaded to Cloudinary:', data.secure_url)
+			} else {
+				// Handle upload errors from Cloudinary with specific error messages
+				console.error('❌ Upload failed. Response:', data)
+
+				let errorMessage = 'Upload failed'
+				if (data.error?.message) {
+					errorMessage = data.error.message
+
+					// Provide specific guidance for common errors
+					if (data.error.message.includes('Upload preset')) {
+						errorMessage +=
+							'\n\n🔧 Solution: Create an upload preset named "employee_profile" in your Cloudinary dashboard with "Unsigned" signing mode.'
+					} else if (data.error.message.includes('whitelisted')) {
+						errorMessage +=
+							'\n\n🔧 Solution: Make sure your upload preset is set to "Unsigned" mode in your Cloudinary dashboard.'
+					} else if (data.error.message.includes('Invalid')) {
+						errorMessage +=
+							'\n\n🔧 Solution: Check your cloud name and upload preset name in the .env file.'
+					}
+				}
+
+				throw new Error(errorMessage)
+			}
+		} catch (error) {
+			console.error('❌ Error uploading image to Cloudinary:', error)
+			toast.error('Failed to upload image. Please try again.')
+		} finally {
+			setUploading(false) // Hide loading indicator
+			console.log('🏁 Upload process completed')
+		}
+	}
+
+	/**
+	 * Load Employee Data for Editing
+	 *
+	 * This effect runs when the component mounts and determines if we're in edit mode.
+	 * If editing an existing employee, it fetches the employee data and populates
+	 * the form fields with the current values, including setting up the image preview.
+	 */
 	useEffect(() => {
 		const loadEmployeeData = async () => {
 			if (!isEditing || !id) return
@@ -86,10 +212,22 @@ export const AddEmployeePage = () => {
 		loadEmployeeData()
 	}, [isEditing, id, reset, navigate])
 
-	// DYNAMIC FIELD VISIBILITY: Watch the 'ongoing' checkbox to show/hide finish date
+	/**
+	 * Dynamic Field Visibility Control
+	 *
+	 * Watch the 'ongoing' checkbox value to dynamically show/hide the finish date field.
+	 * When ongoing is true, the finish date field is hidden since the employment
+	 * has no defined end date.
+	 */
 	const isOngoing = watch('ongoing')
 
-	// FORM SUBMISSION HANDLER: This runs when the user submits the form
+	/**
+	 * Form Submission Handler
+	 *
+	 * This function processes the form data when the user submits the employee form.
+	 * It handles both creating new employees and updating existing ones based on
+	 * the current mode (determined by the presence of an ID in the URL).
+	 */
 	const onSubmit = async (data: EmployeeFormData) => {
 		try {
 			console.log(
@@ -99,11 +237,13 @@ export const AddEmployeePage = () => {
 
 			if (isEditing && id) {
 				// UPDATE EXISTING EMPLOYEE
+				// Transform form data to match the UpdateEmployeeDTO interface
+				// Convert empty strings to undefined for optional fields
 				const updateData: UpdateEmployeeDTO = {
 					...data,
 					finishDate: data.ongoing ? undefined : data.finishDate,
 					middleName: data.middleName || undefined,
-					thumbnailUrl: data.thumbnailUrl || undefined,
+					thumbnailUrl: data.thumbnailUrl || undefined, // This now contains the Cloudinary URL
 					hoursPerWeek: data.hoursPerWeek || undefined,
 				}
 
@@ -113,11 +253,13 @@ export const AddEmployeePage = () => {
 				)
 			} else {
 				// CREATE NEW EMPLOYEE
+				// Transform form data to match the CreateEmployeeDTO interface
+				// Convert empty strings to undefined for optional fields
 				const employeeData: CreateEmployeeDTO = {
 					...data,
 					finishDate: data.ongoing ? undefined : data.finishDate,
 					middleName: data.middleName || undefined,
-					thumbnailUrl: data.thumbnailUrl || undefined,
+					thumbnailUrl: data.thumbnailUrl || undefined, // This now contains the Cloudinary URL
 					hoursPerWeek: data.hoursPerWeek || undefined,
 				}
 
@@ -126,7 +268,8 @@ export const AddEmployeePage = () => {
 				reset() // Only reset form when creating new employee
 			}
 
-			navigate('/employees') // Redirect to employees page
+			// Redirect to employees list page after successful operation
+			navigate('/employees')
 		} catch (error) {
 			console.error(
 				`Error ${isEditing ? 'updating' : 'creating'} employee:`,
@@ -244,19 +387,69 @@ export const AddEmployeePage = () => {
 									)}
 								</div>
 
-								{/* PROFILE PHOTO URL FIELD (OPTIONAL) */}
-								<div>
+								{/* PROFILE PHOTO UPLOAD FIELD */}
+								<div className='md:col-span-2'>
 									<label className='block text-sm font-medium text-gray-700 mb-2'>
-										Profile Photo URL
+										Profile Photo
 									</label>
-									<input
-										{...register('thumbnailUrl')}
-										type='url'
-										className={`w-full px-3 py-2 border rounded-lg  ${
-											errors.thumbnailUrl ? 'border-red-500' : 'border-gray-300'
-										}`}
-										placeholder='https://example.com/photo.jpg'
-									/>
+
+									{/* Image Preview Section */}
+									{previewUrl && (
+										<div className='mb-4'>
+											<div className='relative inline-block'>
+												<img
+													src={previewUrl}
+													alt='Profile preview'
+													className='w-32 h-32 object-cover rounded-lg border-2 border-gray-200 shadow-sm'
+												/>
+												<button
+													type='button'
+													onClick={() => {
+														setPreviewUrl(null)
+														reset((prevData) => ({
+															...prevData,
+															thumbnailUrl: '',
+														}))
+													}}
+													className='absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600 transition-colors'
+													title='Remove photo'>
+													×
+												</button>
+											</div>
+											<p className='text-sm text-gray-600 mt-2'>
+												Current profile photo
+											</p>
+										</div>
+									)}
+
+									{/* File Upload Input */}
+									<div className='space-y-2'>
+										<input
+											type='file'
+											accept='image/*'
+											onChange={uploadImage}
+											disabled={uploading}
+											className='block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-1 file:border-gray-300 file:text-sm file:font-medium file:bg-blue-50 file:text-slate-700 hover:file:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed'
+										/>
+
+										{/* Upload Status */}
+										{uploading && (
+											<div className='flex items-center text-sm text-blue-600'>
+												<div className='animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent mr-2'></div>
+												Uploading image...
+											</div>
+										)}
+
+										{/* Help Text */}
+										<p className='text-xs text-gray-500'>
+											Upload a profile photo (JPG, PNG, GIF). Maximum file size:
+											5MB. ( Make sure your face is visible )
+										</p>
+									</div>
+
+									{/* Hidden input to store the URL in the form */}
+									<input {...register('thumbnailUrl')} type='hidden' />
+
 									{errors.thumbnailUrl && (
 										<p className='mt-1 text-sm text-red-600'>
 											{errors.thumbnailUrl.message}
