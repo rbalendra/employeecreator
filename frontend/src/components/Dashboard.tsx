@@ -88,8 +88,63 @@ export const Dashboard = () => {
 					inactiveCount: inactiveEmployees.length,
 				})
 
-				// Sort employees by ID descending, take top 6 for "recent"
-				const recent = allEmployees.sort((a, b) => b.id - a.id).slice(0, 6)
+				// Sort employees: UPDATED/NEW first, then by most recent
+				const sortedEmployees = allEmployees.sort((a, b) => {
+					// Helper to check if employee has NEW or UPDATED tag
+					const getTagPriority = (employee: Employee) => {
+						if (!employee.createdAt || !employee.updatedAt) return 3
+
+						const createdDate = new Date(employee.createdAt)
+						const updatedDate = new Date(employee.updatedAt)
+						const now = new Date()
+						const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000) // 1 hour ago
+						const timeDifferenceMs =
+							updatedDate.getTime() - createdDate.getTime()
+
+						console.log('🔍 Dashboard Tag Priority Debug:', {
+							id: employee.id,
+							firstName: employee.firstName,
+							createdAt: employee.createdAt,
+							updatedAt: employee.updatedAt,
+							oneHourAgo: oneHourAgo.toISOString(),
+							timeDifferenceMs: timeDifferenceMs,
+							isUpdatedRecent: updatedDate > oneHourAgo,
+							isCreatedRecent: createdDate > oneHourAgo,
+						})
+
+						// UPDATED employees (highest priority) - updated within last hour AND has time difference
+						if (updatedDate > oneHourAgo && timeDifferenceMs > 1000) {
+							// 1 second minimum difference
+							console.log('✅ Dashboard: Employee is UPDATED')
+							return 1
+						}
+						// NEW employees (second priority) - created within last hour AND no significant updates
+						if (createdDate > oneHourAgo && timeDifferenceMs <= 1000) {
+							// Less than 1 second difference
+							console.log('✅ Dashboard: Employee is NEW')
+							return 2
+						}
+						// Regular employees (lowest priority)
+						console.log('❌ Dashboard: No tag assigned')
+						return 3
+					}
+
+					const priorityA = getTagPriority(a)
+					const priorityB = getTagPriority(b)
+
+					// If priorities are different, sort by priority
+					if (priorityA !== priorityB) {
+						return priorityA - priorityB
+					}
+
+					// If same priority, sort by most recent update/creation
+					const updatedA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0
+					const updatedB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0
+					return updatedB - updatedA
+				})
+
+				// Take top 6 for recent employees
+				const recent = sortedEmployees.slice(0, 6)
 				setRecentEmployees(recent)
 
 				console.log('✅ Dashboard data loaded successfully')
@@ -234,7 +289,7 @@ export const Dashboard = () => {
 					<div className='px-6 py-4 border-b border-gray-200'>
 						<div className='flex items-center justify-between'>
 							<h2 className='text-lg font-semibold text-gray-900'>
-								Recent Employees
+								New and recently updated employees
 							</h2>
 							<Button
 								variant='ghost'

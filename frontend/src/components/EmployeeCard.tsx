@@ -20,48 +20,15 @@ export const EmployeeCard = ({
 		return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
 	}
 
-	// Helper function to determine if the employee is new or recently updated
+	// Helper function to determine if the employee is new (created within last hour)
 	const getEmployeeTag = () => {
-		console.log('🔍 Employee Tag Debug:', {
-			id: employee.id,
-			firstName: employee.firstName,
-			createdAt: employee.createdAt,
-			updatedAt: employee.updatedAt,
-		})
-
-		if (employee.createdAt && employee.updatedAt) {
+		if (employee.createdAt) {
 			const createdDate = new Date(employee.createdAt)
-			const updatedDate = new Date(employee.updatedAt)
 			const now = new Date()
+			const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000) // 1 hour ago
 
-			// Make time windows much longer for testing
-			const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) // 7 days instead of 1
-			const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000) // 30 days instead of 3
-			const timeDifferenceMs = updatedDate.getTime() - createdDate.getTime()
-			const timeDifferenceMinutes = timeDifferenceMs / (1000 * 60)
-
-			console.log('📅 Time analysis:', {
-				created: createdDate.toISOString(),
-				updated: updatedDate.toISOString(),
-				now: now.toISOString(),
-				sevenDaysAgo: sevenDaysAgo.toISOString(),
-				isUpdatedRecent: updatedDate > sevenDaysAgo,
-				timeDifferenceMs: timeDifferenceMs,
-				timeDifferenceMinutes: timeDifferenceMinutes,
-				isUpdatedAfterCreated: timeDifferenceMs > 0,
-			})
-
-			// Show UPDATED if:
-			// 1. Updated in last 7 days AND
-			// 2. There's more than 1 minute difference between created and updated
-			if (updatedDate > sevenDaysAgo && timeDifferenceMinutes > 1) {
-				console.log('✅ Employee is UPDATED')
-				return { type: 'UPDATED', color: 'bg-blue-500 text-white' }
-			}
-
-			// Show NEW if created in last 30 days and timestamps are close
-			if (createdDate > thirtyDaysAgo && timeDifferenceMinutes <= 1) {
-				console.log('✅ Employee is NEW')
+			// Show NEW if created in last hour
+			if (createdDate > oneHourAgo) {
 				return { type: 'NEW', color: 'bg-green-500 text-white' }
 			}
 		}

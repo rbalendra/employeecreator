@@ -95,7 +95,7 @@ public class Employee {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
-        System.out.println("🔧 @PreUpdate called - Setting updatedAt: " + this.updatedAt);
+        System.out.println("🔧 @PreUpdate called for employee ID: " + this.id + " - Setting updatedAt: " + this.updatedAt);
     }
  
 

@@ -8,6 +8,8 @@ import {
 	MdSchedule,
 	MdCalendarToday,
 	MdClose,
+	MdUpdate,
+	MdAdd,
 } from 'react-icons/md'
 
 interface EmployeeDetailsModalProps {
@@ -131,6 +133,56 @@ export const EmployeeDetailsModal = ({
 										</span>
 									)}
 								</div>
+							</div>
+						</div>
+
+						{/* Record Timestamps - Highlighted Section */}
+						<div className='bg-yellow-50 border border-yellow-200 rounded-lg p-4'>
+							<h4 className='text-lg font-semibold text-gray-900 mb-3 flex items-center'>
+								<MdUpdate className='text-yellow-600 text-xl mr-2' />
+								Record Information
+							</h4>
+							<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+								{employee.createdAt && (
+									<div className='flex items-center space-x-3'>
+										<MdAdd className='text-green-600 text-xl' />
+										<div>
+											<p className='text-sm text-gray-600 font-medium'>
+												Created
+											</p>
+											<p className='text-sm text-gray-800'>
+												{new Date(employee.createdAt).toLocaleString('en-AU', {
+													year: 'numeric',
+													month: 'short',
+													day: 'numeric',
+													hour: '2-digit',
+													minute: '2-digit',
+													hour12: true,
+												})}
+											</p>
+										</div>
+									</div>
+								)}
+								{employee.updatedAt && (
+									<div className='flex items-center space-x-3'>
+										<MdUpdate className='text-blue-600 text-xl' />
+										<div>
+											<p className='text-sm text-gray-600 font-medium'>
+												Last Updated
+											</p>
+											<p className='text-sm text-gray-800'>
+												{new Date(employee.updatedAt).toLocaleString('en-AU', {
+													year: 'numeric',
+													month: 'short',
+													day: 'numeric',
+													hour: '2-digit',
+													minute: '2-digit',
+													hour12: true,
+												})}
+											</p>
+										</div>
+									</div>
+								)}
 							</div>
 						</div>
 
