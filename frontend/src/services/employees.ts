@@ -15,6 +15,8 @@ export interface Employee {
 	employmentBasis: 'FULL_TIME' | 'PART_TIME'
 	hoursPerWeek?: number
 	thumbnailUrl?: string
+	createdAt?: string
+	updatedAt?: string
 }
 
 // Interface for creating new employees (matches CreateEmployeeDTO)

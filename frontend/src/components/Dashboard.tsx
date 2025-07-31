@@ -19,6 +19,7 @@ import {
 	MdArrowForward,
 } from 'react-icons/md'
 import { useNavigate } from 'react-router'
+import { EmployeeChart } from './EmployeeChart'
 
 export const Dashboard = () => {
 	// State for dashboard data
@@ -28,6 +29,8 @@ export const Dashboard = () => {
 		partTimeCount: 0,
 		permanentCount: 0,
 		contractCount: 0,
+		activeCount: 0,
+		inactiveCount: 0,
 	})
 
 	const [recentEmployees, setRecentEmployees] = useState<Employee[]>([])
@@ -47,16 +50,45 @@ export const Dashboard = () => {
 				setLoading(true)
 				console.log('🔄 Loading dashboard data...')
 
-				// Fetch statistics and recent employees in parallel
 				const [dashboardStats, allEmployees] = await Promise.all([
 					getDashboardStats(),
 					getAllEmployees(),
 				])
 
-				// Update stats card numbers
-				setStats(dashboardStats)
+				// Calculate active/inactive counts
+				const isEmployeeActive = (employee: Employee) => {
+					const now = new Date()
+					const today = new Date(
+						now.getFullYear(),
+						now.getMonth(),
+						now.getDate()
+					)
 
-				// Sort employees by ID descending, take top 6 for “recent”
+					if (employee.finishDate) {
+						const finishDate = new Date(employee.finishDate)
+						const finishDateOnly = new Date(
+							finishDate.getFullYear(),
+							finishDate.getMonth(),
+							finishDate.getDate()
+						)
+						return finishDateOnly >= today
+					}
+					return true
+				}
+
+				const activeEmployees = allEmployees.filter(isEmployeeActive)
+				const inactiveEmployees = allEmployees.filter(
+					(emp) => !isEmployeeActive(emp)
+				)
+
+				// Update stats with calculated active/inactive counts
+				setStats({
+					...dashboardStats,
+					activeCount: activeEmployees.length,
+					inactiveCount: inactiveEmployees.length,
+				})
+
+				// Sort employees by ID descending, take top 6 for "recent"
 				const recent = allEmployees.sort((a, b) => b.id - a.id).slice(0, 6)
 				setRecentEmployees(recent)
 
@@ -137,7 +169,17 @@ export const Dashboard = () => {
 						<div className='text-right'>
 							<p className='text-sm text-gray-500 mb-1'>Last updated</p>
 							<p className='text-sm font-medium text-gray-900'>
-								{new Date().toLocaleTimeString()}
+								{new Date().toLocaleDateString('en-AU', {
+									day: '2-digit',
+									month: '2-digit',
+									year: 'numeric',
+								})}{' '}
+								at{' '}
+								{new Date().toLocaleTimeString('en-AU', {
+									hour: '2-digit',
+									minute: '2-digit',
+									hour12: true,
+								})}
 							</p>
 						</div>
 					</div>
@@ -184,6 +226,8 @@ export const Dashboard = () => {
 						textColor='text-black'
 					/>
 				</div>
+				{/* Charts Section */}
+				<EmployeeChart stats={stats} />
 
 				{/* Modern Recent Employees Section */}
 				<div className='bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden'>

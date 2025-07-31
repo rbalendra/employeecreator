@@ -1,6 +1,7 @@
 package nology.employeecreator.employee;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 
 /* this DTO is created to control output format (what API sends back to clients) so intead of sending all details from Employee Entity. For example GET/employees may return a summary of few (id/name/contract). GET/employees/{id} we can return full details. POST/employees can return just the ID and status not the full record etc */
@@ -22,6 +23,8 @@ public class EmployeeResponseDTO {
         private EmploymentBasis employmentBasis;
         private Integer hoursPerWeek;
         private String thumbnailUrl;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
 
     /* --------------------------- CONSTRUCTORS --------------------------- */
     public EmployeeResponseDTO() {
@@ -87,6 +90,13 @@ public class EmployeeResponseDTO {
         return thumbnailUrl;
     }
 
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+    
+      public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 
     /* --------------------------------- SETTERS -------------------------------- */
     public void setId(Long id) {
@@ -143,5 +153,11 @@ public class EmployeeResponseDTO {
         this.thumbnailUrl = thumbnailUrl;
     }
         
-
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+    
+     public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }

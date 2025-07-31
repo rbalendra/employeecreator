@@ -20,6 +20,56 @@ export const EmployeeCard = ({
 		return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
 	}
 
+	// Helper function to determine if the employee is new or recently updated
+	const getEmployeeTag = () => {
+		console.log('🔍 Employee Tag Debug:', {
+			id: employee.id,
+			firstName: employee.firstName,
+			createdAt: employee.createdAt,
+			updatedAt: employee.updatedAt,
+		})
+
+		if (employee.createdAt && employee.updatedAt) {
+			const createdDate = new Date(employee.createdAt)
+			const updatedDate = new Date(employee.updatedAt)
+			const now = new Date()
+
+			// Make time windows much longer for testing
+			const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) // 7 days instead of 1
+			const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000) // 30 days instead of 3
+			const timeDifferenceMs = updatedDate.getTime() - createdDate.getTime()
+			const timeDifferenceMinutes = timeDifferenceMs / (1000 * 60)
+
+			console.log('📅 Time analysis:', {
+				created: createdDate.toISOString(),
+				updated: updatedDate.toISOString(),
+				now: now.toISOString(),
+				sevenDaysAgo: sevenDaysAgo.toISOString(),
+				isUpdatedRecent: updatedDate > sevenDaysAgo,
+				timeDifferenceMs: timeDifferenceMs,
+				timeDifferenceMinutes: timeDifferenceMinutes,
+				isUpdatedAfterCreated: timeDifferenceMs > 0,
+			})
+
+			// Show UPDATED if:
+			// 1. Updated in last 7 days AND
+			// 2. There's more than 1 minute difference between created and updated
+			if (updatedDate > sevenDaysAgo && timeDifferenceMinutes > 1) {
+				console.log('✅ Employee is UPDATED')
+				return { type: 'UPDATED', color: 'bg-blue-500 text-white' }
+			}
+
+			// Show NEW if created in last 30 days and timestamps are close
+			if (createdDate > thirtyDaysAgo && timeDifferenceMinutes <= 1) {
+				console.log('✅ Employee is NEW')
+				return { type: 'NEW', color: 'bg-green-500 text-white' }
+			}
+		}
+
+		return null
+	}
+	const employeeTag = getEmployeeTag()
+
 	// Helper function to get contract type badge color
 	const getContractTypeColor = (contractType: string) => {
 		return contractType === 'PERMANENT'
@@ -86,7 +136,13 @@ export const EmployeeCard = ({
 
 	return (
 		<div
-			className={`rounded-lg shadow-sm border p-6 transition-shadow ${getCardStyling()}`}>
+			className={`relative rounded-lg shadow-sm border p-6 transition-shadow ${getCardStyling()}`}>
+			{employeeTag && (
+				<div
+					className={`absolute -top-2 -right-2 ${employeeTag.color} text-xs font-bold px-2 py-1 rounded-full shadow-lg z-10`}>
+					{employeeTag.type}
+				</div>
+			)}
 			{/* Employee Header - Photo and Basic Info */}
 			<div className='flex items-start space-x-4'>
 				{/* Employee Avatar */}

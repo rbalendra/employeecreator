@@ -235,13 +235,20 @@ export const AddEmployeePage = () => {
 				data
 			)
 
+			if (data.ongoing) {
+				console.log('Employee marked as ongoing - learing finish date')
+			} else if (data.finishDate) {
+				console.log('Employee finish date: ', data.finishDate)
+			}
+
 			if (isEditing && id) {
 				// UPDATE EXISTING EMPLOYEE
 				// Transform form data to match the UpdateEmployeeDTO interface
 				// Convert empty strings to undefined for optional fields
 				const updateData: UpdateEmployeeDTO = {
 					...data,
-					finishDate: data.ongoing ? undefined : data.finishDate,
+					finishDate: data.ongoing ? undefined : data.finishDate || undefined,
+					ongoing: data.ongoing,
 					middleName: data.middleName || undefined,
 					thumbnailUrl: data.thumbnailUrl || undefined, // This now contains the Cloudinary URL
 					hoursPerWeek: data.hoursPerWeek || undefined,
@@ -257,7 +264,8 @@ export const AddEmployeePage = () => {
 				// Convert empty strings to undefined for optional fields
 				const employeeData: CreateEmployeeDTO = {
 					...data,
-					finishDate: data.ongoing ? undefined : data.finishDate,
+					finishDate: data.ongoing ? undefined : data.finishDate || undefined,
+					ongoing: data.ongoing,
 					middleName: data.middleName || undefined,
 					thumbnailUrl: data.thumbnailUrl || undefined, // This now contains the Cloudinary URL
 					hoursPerWeek: data.hoursPerWeek || undefined,

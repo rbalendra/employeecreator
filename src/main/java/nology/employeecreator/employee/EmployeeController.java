@@ -2,6 +2,7 @@ package nology.employeecreator.employee;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -127,6 +128,12 @@ public List<EmployeeResponseDTO> getAllEmployees() {
 
     }
 
+//     /* ----------------------------- Dashboard stats ---------------------------- */
+//     @GetMapping("/dashboard-stats")
+//     public ResponseEntity<Map<String, Long>> getDashboardStats() {
+//     Map<String, Long> stats = employeeService.getDashboardStats();
+//     return ResponseEntity.ok(stats);
+// }
 
 
 }

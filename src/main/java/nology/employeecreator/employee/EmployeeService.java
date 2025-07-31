@@ -222,6 +222,11 @@ private Sort createSort(String sortBy, String sortDirection) {
         if (data.getFinishDate() != null) {
             employeeToUpdate.setFinishDate(data.getFinishDate());
         }
+        // Only set finish date if employee is NOT ongoing
+        if (data.getFinishDate() != null && !employeeToUpdate.isOngoing()) {
+        employeeToUpdate.setFinishDate(data.getFinishDate());
+        System.out.println("📅 Setting finish date: " + data.getFinishDate());
+        }
         if (data.getEmploymentBasis() != null) {
             employeeToUpdate.setEmploymentBasis(data.getEmploymentBasis());
         }
@@ -231,10 +236,15 @@ private Sort createSort(String sortBy, String sortDirection) {
         if (data.getOngoing() != null) {
             employeeToUpdate.setOngoing(data.getOngoing());
         }
-         if (data.getThumbnailUrl() != null) { // Add this block
+        if (data.getOngoing()) {
+            employeeToUpdate.setFinishDate(null);
+            System.out.println("🔄 Employee marked as ongoing - clearing finish date");
+        }
+      
+        if (data.getThumbnailUrl() != null) { // Add this block
             employeeToUpdate.setThumbnailUrl(data.getThumbnailUrl());
         }
-        
+     
         // Save updated employee
         Employee updatedEmployee = employeeRepository.save(employeeToUpdate);
         return convertToResponseDTO(updatedEmployee);
@@ -277,6 +287,8 @@ private Sort createSort(String sortBy, String sortDirection) {
         response.setEmploymentBasis(employee.getEmploymentBasis());
         response.setHoursPerWeek(employee.getHoursPerWeek());
         response.setThumbnailUrl(employee.getThumbnailUrl());
+        response.setCreatedAt(employee.getCreatedAt());
+        response.setUpdatedAt(employee.getUpdatedAt());
         
         return response;
     }
