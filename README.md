@@ -84,7 +84,7 @@ Before running the application, ensure you have:
 - 🟢 Node.js 18+
 - 📱 npm or yarn
 
-### 🧩 Backend Setup (Spring Boot)
+#### 🧩 Backend Setup (Spring Boot)
 
 #### 1) Clone the repository:
 ```md
@@ -127,4 +127,70 @@ mvn spring-boot:run
 The backend will be available at ``http://localhost:8080``
 
 
-### ⚛️ Frontend Setup (React + Vite)
+#### ⚛️ Frontend Setup (React + Vite)
+
+#### 1) Navigate to frontend directory
+```bash
+cd frontend
+```
+
+#### 2) Install Dependencies
+```bash
+npm install
+```
+
+#### 3) Configure Environment Variables: 
+Create ``.env`` file:
+```bash
+VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
+VITE_CLOUDINARY_UPLOAD_PRESET=your_upload_preset
+```
+
+#### 4) Run Development Server:
+```bash
+npm run dev
+```
+The frontend will be available at ``http://localhost:5173``
+
+
+#### Frontend Tests:
+```bash
+cd frontend
+npm run test
+# or with UI
+npm run test:ui
+```
+#### Backend Tests:
+```bash
+mvn test
+```
+## Challenges
+- **Complex State Management:** Implementing efficient employee status calculation logic that considers both ``ongoing`` flags and finish dates
+- **Form Validation Synchronisation:** Ensuring frontend Zod schemas match backend validation constraints
+- **Image Upload Integration:** Seamlessly integrating Cloudinary with React Hook Form for real-time preview
+- **Responsive Chart Design:** Making Recharts responsive across different screen sizes
+- **Type Safety:** Maintaining strict TypeScript typing across complex form data and API responses
+
+## Areas for Growth
+
+### 🔐 Authentication & Authorization
+- Implement JWT-based authentication
+- Role-based access control (Admin, HR, Manager, Employee)
+- Secure API endpoints with proper authorisation
+
+### 📊 Enhanced Analytics
+- Employee performance tracking
+- Department-wise analytics (new departments)
+- Historical data visualisation
+- Export functionality (PDF, Excel)
+
+### 🏗️ Infrastructure Improvements
+- Docker containerization
+- CI/CD pipeline setup
+- Production deployment automation
+- Performance monitoring and logging
+
+### 🎨 UX Enhancements
+- Dark mode support
+- Advanced filtering with saved searches
+- Drag-and-drop file uploads
