@@ -6,7 +6,7 @@
 - [🔨 Tech Stack](#Tech-Stack)
 - [✨ Key Features](#Key-features)
 - [📸 Screenshots](#Screenshots)
-- ⚙️ Installation Guide
+- [⚙️ Installation Guide](#installation-guide)
 - 🧩 Challenges
 - 🚀 Areas for Growth
 
@@ -14,13 +14,13 @@
 Talent Forge is a modern, full-stack employee management system that transforms how organisations handle their workforce data. With an emphasis on user experience and data visualisation, it provides both detailed individual employee management and comprehensive dashboard analytics.
 
 ## Project Objectives
-Create an intuitive, professional-grade employee management system
-Implement modern React patterns with TypeScript for type safety
-Build a scalable Spring Boot backend with clean architecture
-Provide meaningful data visualization for HR insights
-Ensure responsive design across all device types
-Implement comprehensive form validation and error handling
-Learn and apply modern full-stack development practices
+- Create an intuitive, professional-grade employee management system
+- Implement modern React patterns with TypeScript for type safety
+- Build a scalable Spring Boot backend with clean architecture
+- Provide meaningful data visualisation for HR insights
+- Ensure responsive design across all device types
+- Implement comprehensive form validation and error handling
+- Learn and apply modern full-stack development practices
 
 ## Tech Stack
 - Frontend: React 19, TypeScript, Vite, TailwindCSS
@@ -73,3 +73,56 @@ Image Management (Cloudinary):
 - Real-time Preview: Immediate image preview during upload
 - Optimised Storage: Automatic image optimisation and delivery
 - Error Handling: Robust upload error management and user feedback
+
+## Installation Guide
+Prerequisites
+
+Before running the application, ensure you have:
+- ☕ Java Development Kit (JDK) 17+
+- 📦 Apache Maven 3.6+
+- 🐬 MySQL 8.0+
+- 🟢 Node.js 18+
+- 📱 npm or yarn
+
+🧩 Backend Setup (Spring Boot)
+
+#### 1) Clone the repository:
+```md
+git clone https://github.com/yourusername/employeecreator.git
+cd employeecreator
+```
+#### 2) Configure mySQL Database:
+```sql
+-- Log into MySQL
+mysql -u root -p
+
+-- Create database
+CREATE DATABASE empcreator;
+```
+#### 3) Configure Application Properties:
+Create ``application.properties``:
+```java
+spring.application.name=employeecreator
+spring.datasource.url=jdbc:mysql://localhost:3306/${DB_NAME}
+spring.datasource.username=${MYSQL_USER}
+spring.datasource.password=${MYSQL_PASS}
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.jpa.database-platform=org.hibernate.dialect.MySQL8Dialect
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+```
+#### 4) Set Environment Variables:
+```java
+export DB_NAME=empcreator
+export MYSQL_USER=root
+export MYSQL_PASS=yourpassword
+```
+#### 5) Install Dependencies & Run: 
+```java
+mvn clean install
+mvn spring-boot:run
+```
+
+The backend will be available at ``http://localhost:8080``
+
