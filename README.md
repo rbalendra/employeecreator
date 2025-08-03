@@ -1,10 +1,10 @@
 # Talent Forge
 
 Table of Contents
-- [🔍 Overview](##overview)
+- [🔍 Overview](#Overview)
 - ✨ Key Features
 - 🎯 Project Objectives
-- [📸 Screenshots](##screenshots)
+- [📸 Screenshots](#Screenshots)
 - ⚙️ Installation Guide
 - 🧩 Challenges
 - 🚀 Areas for Growth
