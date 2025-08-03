@@ -1,6 +1,6 @@
 # Talent Forge
 
-Table of Contents
+### Table of Contents
 - [🔍 Overview](#Overview)
 - [🔨 Tech Stack](#Tech-Stack)
 - ✨ Key Features
@@ -26,10 +26,19 @@ Responsive frontend built with React + TypeScript + Vite, Spring Boot (Java) bac
 - Image Storage: Cloudinary integration
 - Testing: Vitest for unit testing
 
-## Screenshots
+## Screenshots 
+### Dashboard showing visualisation and key numbers of employee data
 <img alt="image" src="https://github.com/user-attachments/assets/f4459f51-a97d-44fd-a861-642866377384" width="800"/>
+
+### Employees list (active and in-active displayed)
 <img alt="image" src="https://github.com/user-attachments/assets/d5a050bd-c8e5-4c6d-82cf-3f7c3e1e90b8" width="800"/>
+
+### Individual employee card with more information
 <img alt="image" src="https://github.com/user-attachments/assets/95396021-60db-405e-a001-b676fd53dccb" width="800"/>
+
+### Add new employee form / Update existing employee form
 <img alt="image" src="https://github.com/user-attachments/assets/dd1aa0e1-8ed4-4c9b-b40e-269ea5904eae" width="800"/>
+
+### Add new employee form / Update existing employee form
 <img  alt="image" src="https://github.com/user-attachments/assets/49984714-8228-438c-a67f-5c90fef6f44c" width="800"/>
 
