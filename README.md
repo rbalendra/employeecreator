@@ -7,8 +7,8 @@
 - [✨ Key Features](#Key-features)
 - [📸 Screenshots](#Screenshots)
 - [⚙️ Installation Guide](#installation-guide)
-- 🧩 Challenges
-- 🚀 Areas for Growth
+- [🧩 Challenges](#Challenges)
+- [🚀 Areas for Growth](#Areas-for-growth)
 
 ## Overview
 Talent Forge is a modern, full-stack employee management system that transforms how organisations handle their workforce data. With an emphasis on user experience and data visualisation, it provides both detailed individual employee management and comprehensive dashboard analytics.
