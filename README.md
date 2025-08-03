@@ -49,7 +49,7 @@ Talent Forge is a modern, full-stack employee management system that transforms 
 
 ## Key Features
 Frontend (React + TypeScript + Vite):
-- Modern UI/UX: Built with TailwindCSS for responsive, mobile-first design
+- Modern UI/UX: Built with Tailwind CSS for responsive, mobile-first design
 - Comprehensive Employee Management: Add, edit, view, and delete employee records
 - Advanced Search & Filtering: Real-time search with multiple filter options (contract type, employment basis, status)
 - Interactive Dashboard: Visual analytics with pie charts showing employment distributions
