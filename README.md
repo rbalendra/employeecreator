@@ -2,6 +2,7 @@
 
 Table of Contents
 - [🔍 Overview](#Overview)
+- [🔨 Tech Stack](#Tech-Stack)
 - ✨ Key Features
 - 🎯 Project Objectives
 - [📸 Screenshots](#Screenshots)
@@ -16,6 +17,14 @@ Built for modern teams and HR professionals, Talent Forge provides an intuitive 
 
 Responsive frontend built with React + TypeScript + Vite, Spring Boot (Java) backend with comprehensive REST API, and robust data visualisation with Recharts
 
+## Tech Stack
+- Frontend: React 19, TypeScript, Vite, TailwindCSS
+- Form Management: React Hook Form with Zod validation
+- Charts: Recharts for data visualization
+- Backend: Java, Spring Boot, Spring Data JPA, Maven
+- Database: MySQL with Hibernate ORM
+- Image Storage: Cloudinary integration
+- Testing: Vitest for unit testing
 
 ## Screenshots
 <img alt="image" src="https://github.com/user-attachments/assets/f4459f51-a97d-44fd-a861-642866377384" width="800"/>
