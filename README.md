@@ -18,9 +18,9 @@ Responsive frontend built with React + TypeScript + Vite, Spring Boot (Java) bac
 
 
 ## Screenshots
-<img alt="image" src="https://github.com/user-attachments/assets/f4459f51-a97d-44fd-a861-642866377384" width="600"/>
-<img alt="image" src="https://github.com/user-attachments/assets/d5a050bd-c8e5-4c6d-82cf-3f7c3e1e90b8" width="600"/>
-<img alt="image" src="https://github.com/user-attachments/assets/95396021-60db-405e-a001-b676fd53dccb" width="600"/>
-<img alt="image" src="https://github.com/user-attachments/assets/dd1aa0e1-8ed4-4c9b-b40e-269ea5904eae" width="600"/>
-<img  alt="image" src="https://github.com/user-attachments/assets/49984714-8228-438c-a67f-5c90fef6f44c" width="600"/>
+<img alt="image" src="https://github.com/user-attachments/assets/f4459f51-a97d-44fd-a861-642866377384" width="800"/>
+<img alt="image" src="https://github.com/user-attachments/assets/d5a050bd-c8e5-4c6d-82cf-3f7c3e1e90b8" width="800"/>
+<img alt="image" src="https://github.com/user-attachments/assets/95396021-60db-405e-a001-b676fd53dccb" width="800"/>
+<img alt="image" src="https://github.com/user-attachments/assets/dd1aa0e1-8ed4-4c9b-b40e-269ea5904eae" width="800"/>
+<img  alt="image" src="https://github.com/user-attachments/assets/49984714-8228-438c-a67f-5c90fef6f44c" width="800"/>
 
