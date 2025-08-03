@@ -2,25 +2,30 @@
 
 ### Table of Contents
 - [🔍 Overview](#Overview)
+- [🎯 Project Objectives](#Project-objectives)
 - [🔨 Tech Stack](#Tech-Stack)
-- ✨ Key Features
-- 🎯 Project Objectives
+- [✨ Key Features](#Key-features)
 - [📸 Screenshots](#Screenshots)
 - ⚙️ Installation Guide
 - 🧩 Challenges
 - 🚀 Areas for Growth
 
 ## Overview
-Your comprehensive Employee Management Hub designed to streamline HR operations with style and efficiency.
+Talent Forge is a modern, full-stack employee management system that transforms how organisations handle their workforce data. With an emphasis on user experience and data visualisation, it provides both detailed individual employee management and comprehensive dashboard analytics.
 
-Built for modern teams and HR professionals, Talent Forge provides an intuitive platform to create, manage, and track employee records through a sleek dashboard interface with powerful filtering and visualization capabilities.
-
-Responsive frontend built with React + TypeScript + Vite, Spring Boot (Java) backend with comprehensive REST API, and robust data visualisation with Recharts
+## Project Objectives
+Create an intuitive, professional-grade employee management system
+Implement modern React patterns with TypeScript for type safety
+Build a scalable Spring Boot backend with clean architecture
+Provide meaningful data visualization for HR insights
+Ensure responsive design across all device types
+Implement comprehensive form validation and error handling
+Learn and apply modern full-stack development practices
 
 ## Tech Stack
 - Frontend: React 19, TypeScript, Vite, TailwindCSS
 - Form Management: React Hook Form with Zod validation
-- Charts: Recharts for data visualization
+- Charts: Recharts for data visualisation
 - Backend: Java, Spring Boot, Spring Data JPA, Maven
 - Database: MySQL with Hibernate ORM
 - Image Storage: Cloudinary integration
@@ -42,3 +47,29 @@ Responsive frontend built with React + TypeScript + Vite, Spring Boot (Java) bac
 ### Add new employee form / Update existing employee form
 <img  alt="image" src="https://github.com/user-attachments/assets/49984714-8228-438c-a67f-5c90fef6f44c" width="800"/>
 
+## Key Features
+Frontend (React + TypeScript + Vite):
+- Modern UI/UX: Built with TailwindCSS for responsive, mobile-first design
+- Comprehensive Employee Management: Add, edit, view, and delete employee records
+- Advanced Search & Filtering: Real-time search with multiple filter options (contract type, employment basis, status)
+- Interactive Dashboard: Visual analytics with pie charts showing employment distributions
+- Form Validation: Robust client-side validation using React Hook Form + Zod schemas
+- Image Upload: Seamless profile photo management with Cloudinary integration
+- Employee Status Tracking: Dynamic status calculation based on employment dates
+- Modal Details View: Detailed employee information in a professional ID card layout
+- Toast Notifications: User-friendly feedback for all operations
+- Responsive Design: Optimised for desktop, tablet, and mobile devices
+
+Backend (Spring Boot):
+- RESTful API: Complete CRUD operations with standardised endpoints
+- Advanced Search: Flexible search functionality with multiple parameter support
+- Data Validation: Server-side validation with meaningful error responses
+- JPA Integration: Efficient database operations with Hibernate
+- Pagination Support: Scalable data retrieval for large datasets
+- Employee Status Logic: Sophisticated business logic for active/inactive status determination
+
+Image Management (Cloudinary):
+- Secure Upload: Direct file upload to Cloudinary CDN
+- Real-time Preview: Immediate image preview during upload
+- Optimised Storage: Automatic image optimisation and delivery
+- Error Handling: Robust upload error management and user feedback
