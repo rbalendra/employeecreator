@@ -84,7 +84,7 @@ Before running the application, ensure you have:
 - 🟢 Node.js 18+
 - 📱 npm or yarn
 
-🧩 Backend Setup (Spring Boot)
+### 🧩 Backend Setup (Spring Boot)
 
 #### 1) Clone the repository:
 ```md
@@ -126,3 +126,5 @@ mvn spring-boot:run
 
 The backend will be available at ``http://localhost:8080``
 
+
+### ⚛️ Frontend Setup (React + Vite)
