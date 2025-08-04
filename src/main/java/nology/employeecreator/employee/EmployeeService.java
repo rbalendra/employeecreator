@@ -152,6 +152,7 @@ private Sort createSort(String sortBy, String sortDirection) {
         employee.setEmploymentBasis(data.getEmploymentBasis());
         employee.setHoursPerWeek(data.getHoursPerWeek());
         employee.setThumbnailUrl(data.getThumbnailUrl());
+        employee.setRole(data.getRole());
 
         //save employee to db
         Employee savedEmployee = this.employeeRepository.save(employee);
@@ -240,6 +241,10 @@ private Sort createSort(String sortBy, String sortDirection) {
             employeeToUpdate.setFinishDate(null);
             System.out.println("🔄 Employee marked as ongoing - clearing finish date");
         }
+
+        if (data.getRole() != null) {
+            employeeToUpdate.setRole(data.getRole());
+        }
       
         if (data.getThumbnailUrl() != null) { // Add this block
             employeeToUpdate.setThumbnailUrl(data.getThumbnailUrl());
@@ -289,6 +294,7 @@ private Sort createSort(String sortBy, String sortDirection) {
         response.setThumbnailUrl(employee.getThumbnailUrl());
         response.setCreatedAt(employee.getCreatedAt());
         response.setUpdatedAt(employee.getUpdatedAt());
+        response.setRole(employee.getRole());
         
         return response;
     }

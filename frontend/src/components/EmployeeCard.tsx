@@ -37,6 +37,26 @@ export const EmployeeCard = ({
 	}
 	const employeeTag = getEmployeeTag()
 
+	// Helper function to get role badge color
+	const getRoleColor = (role: string) => {
+		switch (role) {
+			case 'ADMIN':
+				return 'bg-red-100 text-red-800 border-red-200'
+			case 'HR':
+				return 'bg-pink-100 text-pink-800 border-pink-200'
+			case 'MANAGER':
+				return 'bg-indigo-100 text-indigo-800 border-indigo-200'
+			case 'EMPLOYEE':
+				return 'bg-gray-100 text-gray-800 border-gray-200'
+			case 'INTERN':
+				return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+			case 'CONTRACTOR':
+				return 'bg-cyan-100 text-cyan-800 border-cyan-200'
+			default:
+				return 'bg-gray-100 text-gray-800 border-gray-200'
+		}
+	}
+
 	// Helper function to get contract type badge color
 	const getContractTypeColor = (contractType: string) => {
 		return contractType === 'PERMANENT'
@@ -141,25 +161,31 @@ export const EmployeeCard = ({
 
 			{/* Employee Details */}
 			<div className='mt-4 space-y-2'>
-				{/* Contract and Employment Type Badges */}
-				<div className='flex space-x-2'>
+				{/* Contract, Employment Type, Role, and Status Badges */}
+				<div className='flex flex-wrap gap-1.5'>
 					<span
-						className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getContractTypeColor(
+						className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getContractTypeColor(
 							employee.contractType
 						)}`}>
 						{employee.contractType}
 					</span>
 					<span
-						className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getEmploymentBasisColor(
+						className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getEmploymentBasisColor(
 							employee.employmentBasis
 						)}`}>
 						{employee.employmentBasis.replace('_', '-')}
 					</span>
 					<span
-						className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+						className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${getRoleColor(
+							employee.role
+						)}`}>
+						{employee.role}
+					</span>
+					<span
+						className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${
 							employeeStatus.isActive
-								? 'bg-green-100 text-green-800 border-green-800 border-1'
-								: 'bg-red-800 text-white border-red-800 border-1'
+								? 'bg-green-100 text-green-800 border-green-200'
+								: 'bg-red-100 text-red-800 border-red-200'
 						}`}>
 						{employeeStatus.label}
 					</span>

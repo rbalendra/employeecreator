@@ -50,8 +50,19 @@ public class CreateEmployeeDTO {
     @Size(max = 500)
     private String thumbnailUrl;
 
+    @NotNull
+    private EmployeeRole role;
+
 
 /* --------------------------- getters and setters -------------------------- */
+
+    public EmployeeRole getRole(){
+        return role;
+    }
+
+    public void setRole(EmployeeRole role){
+        this.role = role;
+    }
 
     public String getFirstName() {
         return firstName;

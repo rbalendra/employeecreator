@@ -12,6 +12,7 @@ import com.github.javafaker.Faker;
 import nology.employeecreator.employee.ContractType;
 import nology.employeecreator.employee.Employee;
 import nology.employeecreator.employee.EmployeeRepository;
+import nology.employeecreator.employee.EmployeeRole;
 import nology.employeecreator.employee.EmploymentBasis;
 
 @Component
@@ -37,7 +38,7 @@ public class DataSeeder implements CommandLineRunner {
             for (int i = 0; i < 30; i++) {
                 Employee employee = createFakeEmployee();
                 employeeRepository.save(employee);
-                System.out.println("✅ Created employee: " + employee.getFirstName() + " " + employee.getLastName());
+                System.out.println("✅ Created employee: " + employee.getFirstName() + " " + employee.getLastName() + " (" + employee.getRole() + ")");
             }
             
             System.out.println("🎉 Database seeding completed!");
@@ -92,6 +93,25 @@ public class DataSeeder implements CommandLineRunner {
             employee.setHoursPerWeek(15 + random.nextInt(21)); // 15-35 hours
         }
         
+         // Role assignment with realistic distribution
+        double roleChance = random.nextDouble();
+        
+        if (roleChance < 0.03) { // 3% Admin (approx 1 out of 30)
+            employee.setRole(EmployeeRole.ADMIN);
+            System.out.println("🔑 Created ADMIN: " + employee.getFirstName() + " " + employee.getLastName());
+        } else if (roleChance < 0.10) { // 7% HR
+            employee.setRole(EmployeeRole.HR);
+        } else if (roleChance < 0.25) { // 15% Manager
+            employee.setRole(EmployeeRole.MANAGER);
+        } else if (roleChance < 0.80) { // 55% Employee
+            employee.setRole(EmployeeRole.EMPLOYEE);
+        } else if (roleChance < 0.93) { // 13% Intern
+            employee.setRole(EmployeeRole.INTERN);
+        } else { // 7% Contractor
+            employee.setRole(EmployeeRole.CONTRACTOR);
+        }
+
+
         return employee;
     }
 

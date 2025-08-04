@@ -17,6 +17,7 @@ export interface Employee {
 	thumbnailUrl?: string
 	createdAt?: string
 	updatedAt?: string
+	role: 'ADMIN' | 'HR' | 'MANAGER' | 'EMPLOYEE' | 'INTERN' | 'CONTRACTOR'
 }
 
 // Interface for creating new employees (matches CreateEmployeeDTO)
@@ -34,6 +35,7 @@ export interface CreateEmployeeDTO {
 	employmentBasis: 'FULL_TIME' | 'PART_TIME'
 	hoursPerWeek?: number
 	thumbnailUrl?: string
+	role: 'ADMIN' | 'HR' | 'MANAGER' | 'EMPLOYEE' | 'INTERN' | 'CONTRACTOR'
 }
 
 // Interface for updating employees (matches UpdateEmployeeDTO)
@@ -51,6 +53,7 @@ export interface UpdateEmployeeDTO {
 	employmentBasis?: 'FULL_TIME' | 'PART_TIME'
 	hoursPerWeek?: number
 	thumbnailUrl?: string
+	role?: 'ADMIN' | 'HR' | 'MANAGER' | 'EMPLOYEE' | 'INTERN' | 'CONTRACTOR'
 }
 
 /* ------------------------ NEW: PAGINATION INTERFACES ----------------------- */
@@ -154,8 +157,22 @@ export const deleteEmployee = async (id: number): Promise<void> => {
 /* --------------------------- FOR DASHBOARD STATS -------------------------- */
 export const getDashboardStats = async () => {
 	const employees = await getAllEmployees()
+
+	// Helper function to determine if employee is active
+	const isEmployeeActive = (employee: Employee) => {
+		if (employee.ongoing) return true
+		if (!employee.finishDate) return employee.ongoing
+
+		const finishDate = new Date(employee.finishDate)
+		const today = new Date()
+		return finishDate >= today
+	}
+
 	return {
 		totalEmployees: employees.length,
+		// Basic counts
+		activeCount: employees.filter(isEmployeeActive).length,
+		inactiveCount: employees.filter((emp) => !isEmployeeActive(emp)).length,
 		fullTimeCount: employees.filter(
 			(emp) => emp.employmentBasis === 'FULL_TIME'
 		).length,
@@ -166,6 +183,27 @@ export const getDashboardStats = async () => {
 			.length,
 		contractCount: employees.filter((emp) => emp.contractType === 'CONTRACT')
 			.length,
+		// Role counts
+		adminCount: employees.filter((emp) => emp.role === 'ADMIN').length,
+		hrCount: employees.filter((emp) => emp.role === 'HR').length,
+		managerCount: employees.filter((emp) => emp.role === 'MANAGER').length,
+		employeeCount: employees.filter((emp) => emp.role === 'EMPLOYEE').length,
+		internCount: employees.filter((emp) => emp.role === 'INTERN').length,
+		contractorCount: employees.filter((emp) => emp.role === 'CONTRACTOR')
+			.length,
+		// Combined employment type + status counts
+		activeFullTimeCount: employees.filter(
+			(emp) => isEmployeeActive(emp) && emp.employmentBasis === 'FULL_TIME'
+		).length,
+		activePartTimeCount: employees.filter(
+			(emp) => isEmployeeActive(emp) && emp.employmentBasis === 'PART_TIME'
+		).length,
+		inactiveFullTimeCount: employees.filter(
+			(emp) => !isEmployeeActive(emp) && emp.employmentBasis === 'FULL_TIME'
+		).length,
+		inactivePartTimeCount: employees.filter(
+			(emp) => !isEmployeeActive(emp) && emp.employmentBasis === 'PART_TIME'
+		).length,
 	}
 }
 

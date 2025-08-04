@@ -10,6 +10,8 @@ import jakarta.validation.constraints.Size;
 
 public class UpdateEmployeeDTO {
     
+    private EmployeeRole role;
+
     @Size(max = 200)
     private String firstName;
 
@@ -42,6 +44,14 @@ public class UpdateEmployeeDTO {
     private String thumbnailUrl;
 
     /* --------------------------- getters and setters -------------------------- */
+
+    public EmployeeRole getRole() {
+        return role;
+    }
+
+    public void setRole(EmployeeRole role) {
+        this.role = role;
+    }
 
     public String getFirstName() {
         return firstName;

@@ -56,6 +56,7 @@ export const AddEmployeePage = () => {
 			ongoing: true,
 			hoursPerWeek: 40,
 			thumbnailUrl: '',
+			role: 'EMPLOYEE',
 		},
 	})
 
@@ -192,6 +193,7 @@ export const AddEmployeePage = () => {
 					residentialAddress: employee.residentialAddress,
 					contractType: employee.contractType,
 					employmentBasis: employee.employmentBasis,
+					role: employee.role,
 					startDate: employee.startDate,
 					finishDate: employee.finishDate || '',
 					ongoing: employee.ongoing,
@@ -584,7 +586,29 @@ export const AddEmployeePage = () => {
 										</p>
 									)}
 								</div>
-
+								{/* ROLE DROPDOWN */}
+								<div>
+									<label className='block text-sm font-medium text-gray-700 mb-2'>
+										Role *
+									</label>
+									<select
+										{...register('role')}
+										className={`w-full px-3 py-2 border rounded-lg ${
+											errors.role ? 'border-red-500' : 'border-gray-300'
+										}`}>
+										<option value='EMPLOYEE'>Employee</option>
+										<option value='INTERN'>Intern</option>
+										<option value='CONTRACTOR'>Contractor</option>
+										<option value='MANAGER'>Manager</option>
+										<option value='HR'>HR</option>
+										<option value='ADMIN'>Admin</option>
+									</select>
+									{errors.role && (
+										<p className='mt-1 text-sm text-red-600'>
+											{errors.role.message}
+										</p>
+									)}
+								</div>
 								{/* START DATE FIELD */}
 								<div>
 									<label className='block text-sm font-medium text-gray-700 mb-2'>

@@ -19,6 +19,12 @@ export const employeeSchema = z
 		startDate: z.string().min(1, 'Start date is required'),
 		finishDate: z.string().optional(),
 		ongoing: z.boolean(),
+		role: z.enum(
+			['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE', 'INTERN', 'CONTRACTOR'],
+			{
+				errorMap: () => ({ message: 'Please select a role' }),
+			}
+		),
 		hoursPerWeek: z
 			.number()
 			.min(1, 'Hours per week must be at least 1')

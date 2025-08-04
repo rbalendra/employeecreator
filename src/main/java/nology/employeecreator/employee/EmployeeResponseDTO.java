@@ -25,6 +25,7 @@ public class EmployeeResponseDTO {
         private String thumbnailUrl;
         private LocalDateTime createdAt;
         private LocalDateTime updatedAt;
+        private EmployeeRole role;
 
     /* --------------------------- CONSTRUCTORS --------------------------- */
     public EmployeeResponseDTO() {
@@ -33,6 +34,15 @@ public class EmployeeResponseDTO {
 
 
     /* --------------------------------- GETTERS -------------------------------- */
+
+    public EmployeeRole getRole() {
+        return role;
+    }
+
+    public void setRole(EmployeeRole role) {
+        this.role = role;
+    }
+
     public Long getId() {
         return id;
     }

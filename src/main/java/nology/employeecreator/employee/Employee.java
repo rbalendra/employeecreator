@@ -29,6 +29,7 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
     /* -------------------------- personal information -------------------------- */
     @NotBlank @Size(max=200)
     private String firstName;
@@ -59,6 +60,13 @@ public class Employee {
 
     @Size(max=255)
     private String residentialAddress;
+
+    /* ---------------------------- Employment Role --------------------------- */
+
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private EmployeeRole role;
+
 
     /* ---------------------------- Employment Status --------------------------- */
     @Enumerated(EnumType.STRING)
@@ -119,6 +127,7 @@ public class Employee {
         this.ongoing = ongoing;
         this.employmentBasis = employmentBasis;
         this.hoursPerWeek = hoursPerWeek;
+        this.role = role;
     }
 
 
@@ -126,6 +135,14 @@ public class Employee {
 
     public Long getId() {
         return id;
+    }
+
+    public EmployeeRole getRole(){
+        return role;
+    }
+
+    public void setRole(EmployeeRole role){
+        this.role = role;
     }
 
     public String getFirstName() {
