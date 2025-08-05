@@ -84,14 +84,27 @@ public Page<EmployeeResponseDTO> searchEmployees(
         return ResponseEntity.created(location).body(saved);
     }
     
-       /* --------------------------- GET /api/employees (ALL) --------------------- */
+       /* --------------------------- GET /api/employees (PAGINATED) --------------------- */
+   // NEW: Main endpoint now supports pagination for browsing all employees
+   // This allows users to navigate through employees 10 at a time
    @GetMapping
-public List<EmployeeResponseDTO> getAllEmployees() {
-    System.out.println("📋 GET /api/employees called");
-    List<EmployeeResponseDTO> employees = employeeService.getAllEmployees();
-    System.out.println("✅ Returning " + employees.size() + " employees");
-    return employees;
-}
+    public Page<EmployeeResponseDTO> getAllEmployeesPaginated(
+        @RequestParam(required = false, defaultValue = "0") int page,         // Page number (0-based)
+        @RequestParam(required = false, defaultValue = "10") int size,        // Items per page  
+        @RequestParam(required = false, defaultValue = "firstName") String sortBy,     // Field to sort by
+        @RequestParam(required = false, defaultValue = "asc") String sortDirection    // Sort direction
+    ) {
+        System.out.println("GET /api/employees with pagination - Page: " + page + ", Size: " + size);
+        return employeeService.getAllEmployeesPaginated(page, size, sortBy, sortDirection);
+    }
+
+    /* --------------------------- GET /api/employees/all (NON-PAGINATED) --------------------- */
+    // Keep original endpoint for backward compatibility (dashboard stats, etc.)
+    @GetMapping("/all")
+    public List<EmployeeResponseDTO> getAllEmployeesNonPaginated() {
+        System.out.println("GET /api/employees/all - returning all employees");
+        return employeeService.getAllEmployees();
+    }
 
 
 

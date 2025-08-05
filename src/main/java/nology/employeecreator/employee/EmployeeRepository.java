@@ -1,12 +1,9 @@
 package nology.employeecreator.employee;
 
-import java.util.Optional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -23,11 +20,12 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
        "  (:isActive = true AND (e.finishDate IS NULL OR e.finishDate >= CURRENT_DATE)) OR " +
            // Inactive employees: finish date < today
        "  (:isActive = false AND (e.finishDate IS NOT NULL AND e.finishDate < CURRENT_DATE)))")
+
+
     Page<Employee> findWithFilters(
-            @Param("firstName") String firstName,  // Search term (searches both first and last name)
-            @Param("contractType") ContractType contractType,  // Filter by contract type
-            @Param("employmentBasis") EmploymentBasis employmentBasis, // Filter by employment basis
-            @Param("isActive") Boolean isActive,
+            // Search term (searches both first and last name)
+            // Filter by contract type
+            // Filter by employment basis
             Pageable pageable                           // This handles sorting + pagination automatically
     );
     

@@ -41,19 +41,19 @@ export const EmployeeCard = ({
 	const getRoleColor = (role: string) => {
 		switch (role) {
 			case 'ADMIN':
-				return 'bg-red-100 text-red-800 border-red-200'
+				return 'bg-red-100 text-red-800 border-red-800'
 			case 'HR':
-				return 'bg-pink-100 text-pink-800 border-pink-200'
+				return 'bg-pink-100 text-pink-800 border-pink-800'
 			case 'MANAGER':
-				return 'bg-indigo-100 text-indigo-800 border-indigo-200'
+				return 'bg-indigo-100 text-indigo-800 border-indigo-800'
 			case 'EMPLOYEE':
-				return 'bg-gray-100 text-gray-800 border-gray-200'
+				return 'bg-gray-100 text-gray-800 border-gray-800'
 			case 'INTERN':
-				return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+				return 'bg-yellow-100 text-yellow-800 border-yellow-800'
 			case 'CONTRACTOR':
-				return 'bg-cyan-100 text-cyan-800 border-cyan-200'
+				return 'bg-cyan-100 text-cyan-800 border-cyan-800'
 			default:
-				return 'bg-gray-100 text-gray-800 border-gray-200'
+				return 'bg-gray-100 text-gray-800 border-gray-800'
 		}
 	}
 
@@ -164,7 +164,7 @@ export const EmployeeCard = ({
 				{/* Contract, Employment Type, Role, and Status Badges */}
 				<div className='flex flex-wrap gap-1.5'>
 					<span
-						className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getContractTypeColor(
+						className={`inline-flex items-center px-1 py-0.5 rounded text-xs font-medium ${getContractTypeColor(
 							employee.contractType
 						)}`}>
 						{employee.contractType}
@@ -184,8 +184,8 @@ export const EmployeeCard = ({
 					<span
 						className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${
 							employeeStatus.isActive
-								? 'bg-green-100 text-green-800 border-green-200'
-								: 'bg-red-100 text-red-800 border-red-200'
+								? 'bg-green-100 text-green-800 border-green-800'
+								: 'bg-red-800 text-red-100 border-red-800'
 						}`}>
 						{employeeStatus.label}
 					</span>

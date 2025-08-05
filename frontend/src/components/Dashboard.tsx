@@ -5,15 +5,11 @@ import { EmployeeDetailsModal } from './EmployeeDetailsModal'
 import { Button } from './Button'
 import {
 	getDashboardStats,
-	getAllEmployees,
+	getAllEmployeesSimple,
 	type Employee,
 } from '../services/employees'
 import {
 	MdPeople,
-	MdWork,
-	MdSchedule,
-	MdBusiness,
-	MdDescription,
 	MdRefresh,
 	MdPersonAdd,
 	MdArrowForward,
@@ -31,6 +27,16 @@ export const Dashboard = () => {
 		contractCount: 0,
 		activeCount: 0,
 		inactiveCount: 0,
+		adminCount: 0,
+		hrCount: 0,
+		managerCount: 0,
+		employeeCount: 0,
+		internCount: 0,
+		contractorCount: 0,
+		activeFullTimeCount: 0,
+		activePartTimeCount: 0,
+		inactiveFullTimeCount: 0,
+		inactivePartTimeCount: 0,
 	})
 
 	const [recentEmployees, setRecentEmployees] = useState<Employee[]>([])
@@ -52,7 +58,7 @@ export const Dashboard = () => {
 
 				const [dashboardStats, allEmployees] = await Promise.all([
 					getDashboardStats(),
-					getAllEmployees(),
+					getAllEmployeesSimple(), // Use the simple version for dashboard
 				])
 
 				// Calculate active/inactive counts
@@ -248,35 +254,35 @@ export const Dashboard = () => {
 					<StatCard
 						title='Total Employees'
 						value={stats.totalEmployees}
-						icon={<MdPeople />}
+						icon='👥'
 						bgColor='border-orange-500 border-2 '
 						textColor='text-black'
 					/>
 					<StatCard
 						title='Full Time'
 						value={stats.fullTimeCount}
-						icon={<MdWork />}
+						icon='💼'
 						bgColor='border-green-500 border-2 '
 						textColor='text-black'
 					/>
 					<StatCard
 						title='Part Time'
 						value={stats.partTimeCount}
-						icon={<MdSchedule />}
+						icon='⏰'
 						bgColor='border-indigo-500 border-2'
 						textColor='text-black'
 					/>
 					<StatCard
 						title='Permanent'
 						value={stats.permanentCount}
-						icon={<MdBusiness />}
+						icon='🏢'
 						bgColor='border-purple-500 border-2'
 						textColor='text-black'
 					/>
 					<StatCard
 						title='Contract'
 						value={stats.contractCount}
-						icon={<MdDescription />}
+						icon='📄'
 						bgColor='border-yellow-500 border-2'
 						textColor='text-black'
 					/>

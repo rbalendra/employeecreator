@@ -87,11 +87,21 @@ export interface SearchParams {
 export type EmployeeSearchParams = SearchParams
 
 /* ---------------------------- GET ALL EMPLOYEES --------------------------- */
-// Fetch all employees from the backend
-export const getAllEmployees = async (): Promise<Employee[]> => {
+// Fetch all employees from the backend with pagination (for EmployeesPage)
+export const getAllEmployees = async (
+	page: number = 0,
+	size: number = 9,
+	sortBy: string = 'firstName',
+	sortDirection: string = 'asc'
+): Promise<PagedResponse<Employee>> => {
+	const params = new URLSearchParams({
+		page: page.toString(),
+		size: size.toString(),
+		sortBy,
+		sortDirection,
+	})
 	try {
-		const response = await fetch(`${API_BASE_URL}/employees`)
-		console.log('Response status:', response.status)
+		const response = await fetch(`${API_BASE_URL}/employees?${params}`)
 		if (!response.ok) {
 			throw new Error(`HTTP ${response.status}: Failed to fetch employees`)
 		}
@@ -100,6 +110,21 @@ export const getAllEmployees = async (): Promise<Employee[]> => {
 		return data
 	} catch (error) {
 		console.error('💥 Error in getAllEmployees:', error)
+		throw error
+	}
+}
+
+/* ------------------------ GET ALL EMPLOYEES (SIMPLE) ---------------------- */
+// Fetch ALL employees without pagination (for Dashboard and stats)
+export const getAllEmployeesSimple = async (): Promise<Employee[]> => {
+	try {
+		const response = await fetch(`${API_BASE_URL}/employees/all`)
+		if (!response.ok) {
+			throw new Error(`HTTP ${response.status}: Failed to fetch all employees`)
+		}
+		return response.json()
+	} catch (error) {
+		console.error('💥 Error in getAllEmployeesSimple:', error)
 		throw error
 	}
 }
@@ -155,8 +180,14 @@ export const deleteEmployee = async (id: number): Promise<void> => {
 }
 
 /* --------------------------- FOR DASHBOARD STATS -------------------------- */
+// Dashboard needs all employees to calculate stats, so use the non-paginated endpoint
 export const getDashboardStats = async () => {
-	const employees = await getAllEmployees()
+	// Use the /all endpoint to get all employees for stats calculation
+	const response = await fetch(`${API_BASE_URL}/employees/all`)
+	if (!response.ok) {
+		throw new Error('Failed to fetch employees for dashboard')
+	}
+	const employees: Employee[] = await response.json()
 
 	// Helper function to determine if employee is active
 	const isEmployeeActive = (employee: Employee) => {

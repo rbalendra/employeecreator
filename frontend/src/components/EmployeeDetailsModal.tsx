@@ -10,6 +10,12 @@ import {
 	MdClose,
 	MdUpdate,
 	MdAdd,
+	MdAdminPanelSettings,
+	MdGroup,
+	MdManageAccounts,
+	MdBusiness,
+	MdSchool,
+	MdEngineering,
 } from 'react-icons/md'
 
 interface EmployeeDetailsModalProps {
@@ -86,61 +92,6 @@ export const EmployeeDetailsModal = ({
 		}
 	}
 
-	// Helper function to get role banner styling for prominent display
-	const getRoleBanner = (role: string) => {
-		switch (role) {
-			case 'ADMIN':
-				return {
-					bg: 'bg-gradient-to-r from-red-500 to-red-600',
-					text: 'text-white',
-					icon: '👑',
-					title: 'System Administrator',
-				}
-			case 'HR':
-				return {
-					bg: 'bg-gradient-to-r from-pink-500 to-pink-600',
-					text: 'text-white',
-					icon: '👥',
-					title: 'Human Resources',
-				}
-			case 'MANAGER':
-				return {
-					bg: 'bg-gradient-to-r from-indigo-500 to-indigo-600',
-					text: 'text-white',
-					icon: '📊',
-					title: 'Manager',
-				}
-			case 'EMPLOYEE':
-				return {
-					bg: 'bg-gradient-to-r from-gray-500 to-gray-600',
-					text: 'text-white',
-					icon: '💼',
-					title: 'Employee',
-				}
-			case 'INTERN':
-				return {
-					bg: 'bg-gradient-to-r from-yellow-500 to-yellow-600',
-					text: 'text-white',
-					icon: '🎓',
-					title: 'Intern',
-				}
-			case 'CONTRACTOR':
-				return {
-					bg: 'bg-gradient-to-r from-cyan-500 to-cyan-600',
-					text: 'text-white',
-					icon: '🔧',
-					title: 'Contractor',
-				}
-			default:
-				return {
-					bg: 'bg-gradient-to-r from-gray-500 to-gray-600',
-					text: 'text-white',
-					icon: '💼',
-					title: 'Employee',
-				}
-		}
-	}
-
 	return (
 		<div className='fixed inset-0 z-50 overflow-y-auto'>
 			{/* Backdrop */}
@@ -166,25 +117,6 @@ export const EmployeeDetailsModal = ({
 
 					{/* Main content area */}
 					<div className='p-4 sm:p-6 space-y-6'>
-						{/* Role Banner */}
-						{(() => {
-							const roleBanner = getRoleBanner(employee.role)
-							return (
-								<div
-									className={`${roleBanner.bg} ${roleBanner.text} p-4 rounded-lg shadow-md`}>
-									<div className='flex items-center justify-center space-x-3'>
-										<span className='text-2xl'>{roleBanner.icon}</span>
-										<div className='text-center'>
-											<h3 className='text-lg font-bold'>{roleBanner.title}</h3>
-											<p className='text-sm opacity-90'>
-												Role: {employee.role}
-											</p>
-										</div>
-									</div>
-								</div>
-							)
-						})()}
-
 						{/* Driver's License Style Card */}
 						<div className='bg-gradient-to-br from-blue-50 via-white to-purple-50 border-1 border-gray-300 rounded-xl shadow-lg overflow-hidden'>
 							{/* Card header with company branding */}

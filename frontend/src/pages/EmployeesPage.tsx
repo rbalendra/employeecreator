@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { Button } from '../components/Button'
 import { EmployeeCard } from '../components/EmployeeCard'
@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast'
 
 import {
 	getAllEmployees,
-	searchEmployeesSimple,
+	searchEmployees,
 	deleteEmployee,
 	type Employee,
 	type EmployeeSearchParams,
@@ -20,6 +20,16 @@ import {
 	MdSearch,
 	MdFilterList,
 } from 'react-icons/md'
+
+export interface PagedResponse<T> {
+	content: T[]
+	totalPages: number
+	totalElements: number
+	size: number
+	number: number
+	first: boolean
+	last: boolean
+}
 
 export const EmployeesPage = () => {
 	const navigate = useNavigate()
@@ -34,6 +44,11 @@ export const EmployeesPage = () => {
 	const [statusFilter, setStatusFilter] = useState<string>('ALL') // filter active/inactive
 	const [sortBy, setSortBy] = useState<string>('firstName') // field to sort by
 	const [sortDirection, setSortDirection] = useState<string>('asc') // asc & desc
+	//for pagination
+	const [currentPage, setCurrentPage] = useState(0)
+	const [pageSize] = useState(9)
+	const [totalPages, setTotalPages] = useState(0)
+	const [totalEmployees, setTotalEmployees] = useState(0)
 
 	// Modal state
 	const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
@@ -41,84 +56,122 @@ export const EmployeesPage = () => {
 	)
 	const [isModalOpen, setIsModalOpen] = useState(false)
 
-	/* ---------------------------- SEARCH EMPLOYEES ---------------------------- */
-	// performSearch: a stable function to fetch and apply filters/sorting
-	// useCallback ensures the function reference changes only when its dependencies (filters, searchTerm, etc.) change
-	const performSearch = useCallback(async () => {
-		try {
-			setLoading(true)
-			setError(null) // Clear any previous errors
+	/* --------------------------- DATA FETCHING & FILTER HANDLING ---------------------------- */
 
-			// If no filters are applied, get all employees
-			if (
-				!searchTerm &&
-				contractFilter === 'ALL' &&
-				employmentFilter === 'ALL' &&
-				statusFilter === 'ALL'
-			) {
-				console.log('Getting all employees...')
-				const allEmployees = await getAllEmployees()
-				setEmployees(allEmployees)
-			} else {
-				// Use backend search with current filters
-				const searchParams: EmployeeSearchParams = {
-					contractType: contractFilter !== 'ALL' ? contractFilter : undefined,
-					employmentBasis:
-						employmentFilter !== 'ALL' ? employmentFilter : undefined,
-					status: statusFilter !== 'ALL' ? statusFilter : undefined,
-					sortBy: sortBy,
-					sortDirection: sortDirection,
-				}
+	// This is the primary effect for fetching data. It runs whenever any dependency changes.
+	useEffect(() => {
+		// A debounce timer is used to prevent firing API requests on every keystroke in the search bar.
+		const timer = setTimeout(() => {
+			// The actual data fetching logic is wrapped in an async function.
+			const fetchEmployees = async () => {
+				try {
+					setLoading(true)
+					setError(null)
 
-				// Add search term if provided
-				if (searchTerm && searchTerm.trim()) {
-					searchParams.searchTerm = searchTerm.trim()
+					// Check if ANY filters are active
+					const hasActiveFilters =
+						searchTerm ||
+						contractFilter !== 'ALL' ||
+						employmentFilter !== 'ALL' ||
+						statusFilter !== 'ALL'
+
+					if (!hasActiveFilters) {
+						// NO FILTERS: Use paginated getAllEmployees for browsing
+						// This gives us 10 employees per page with next/previous buttons
+						console.log('📄 Fetching paginated employees (browsing mode):', {
+							currentPage,
+							pageSize,
+							sortBy,
+							sortDirection,
+						})
+						const pagedData = await getAllEmployees(
+							currentPage,
+							pageSize,
+							sortBy,
+							sortDirection
+						)
+						// Set employee data and pagination info from the API response
+						setEmployees(pagedData.content)
+						setTotalPages(pagedData.totalPages)
+						setTotalEmployees(pagedData.totalElements)
+					} else {
+						// FILTERS ACTIVE: Use search endpoint and show ALL results on one page
+						// This returns all matching employees without pagination
+						console.log(
+							'🔍 Performing filtered search (all results on one page)'
+						)
+						const searchParams: EmployeeSearchParams = {
+							contractType:
+								contractFilter !== 'ALL' ? contractFilter : undefined,
+							employmentBasis:
+								employmentFilter !== 'ALL' ? employmentFilter : undefined,
+							status: statusFilter !== 'ALL' ? statusFilter : undefined,
+							sortBy: sortBy,
+							sortDirection: sortDirection,
+							searchTerm: searchTerm || undefined,
+						}
+
+						// Use the paginated search but request a large page to get all results
+						const searchResults = await searchEmployees({
+							...searchParams,
+							page: 0, // Always first page
+							size: 1000, // Large size to get all matching results
+						})
+
+						// Set the search results - no pagination for filtered results
+						setEmployees(searchResults.content)
+						setTotalPages(1) // Only 1 page when filtering
+						setTotalEmployees(searchResults.totalElements)
+					}
+				} catch (err) {
+					console.error('💥 Error fetching employees:', err)
+					setError(
+						`Failed to load employees: ${
+							err instanceof Error ? err.message : 'Unknown error'
+						}`
+					)
+					setEmployees([])
+					setTotalPages(0)
+					setTotalEmployees(0)
+				} finally {
+					setLoading(false)
 				}
-				const searchResults = await searchEmployeesSimple(searchParams)
-				setEmployees(searchResults)
 			}
-		} catch (err) {
-			console.error('Error searching employees:', err)
-			setError(
-				`Failed to search employees: ${
-					err instanceof Error ? err.message : 'Unknown error'
-				}`
-			)
-		} finally {
-			console.log('Setting loading to false')
-			setLoading(false)
-		}
+
+			fetchEmployees()
+		}, 300) // 300ms debounce delay
+
+		// Cleanup function: This clears the timeout if a dependency changes before the 300ms is up.
+		return () => clearTimeout(timer)
 	}, [
 		searchTerm,
 		contractFilter,
 		employmentFilter,
+		statusFilter,
 		sortBy,
 		sortDirection,
-		statusFilter,
-	])
-	// Dependencies array: only create a new version of this function if any of these values change,
+		currentPage, // Only affects browsing mode (no filters)
+		pageSize,
+	]) // This effect re-runs if any of these dependencies change.
 
-	/* --------------------------- INITIAL DATA LOAD ---------------------------- */
-	// On first mount, trigger performSearch once
+	// This separate effect handles resetting the page to 0 when filters change.
+	// This prevents being on page 5 when you start filtering and only have 1 page of results.
 	useEffect(() => {
-		performSearch()
-	}, [contractFilter, employmentFilter, statusFilter, sortBy, sortDirection])
-
-	/* -------------------------- SEARCH WHEN FILTERS CHANGE ------------------- */
-	// Debounce search calls: wait 300ms after last filter/searchTerm update
-	// This prevents rapid API calls while the user types or toggles filters
-	// if user type "john" without debounce it would trigger 4 API calls (j, jo, joh, john)
-	useEffect(() => {
-		console.log('Setting up search debounce for:', searchTerm)
-		const timer = setTimeout(() => {
-			performSearch()
-		}, 300) // 300ms debounce: meaning search only triggers if the user stops typing for 300 secs
-
-		return () => {
-			console.log('Cleaning up search timer')
-			clearTimeout(timer)
+		// Reset to first page when any filter changes (but not on initial load)
+		if (currentPage !== 0) {
+			console.log('🔄 Filters changed, resetting to page 1')
+			setCurrentPage(0)
 		}
-	}, [searchTerm]) // Only searchTerm triggers debounce
+		// NOTE: We don't include `currentPage` in dependencies to avoid infinite loops
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [
+		searchTerm,
+		contractFilter,
+		employmentFilter,
+		statusFilter,
+		sortBy,
+		sortDirection,
+	])
 
 	/* ----------------------------- HANDLER FUNCTIONS ----------------------------- */
 	// Handle employee deletion
@@ -134,8 +187,12 @@ export const EmployeesPage = () => {
 			try {
 				console.log('Deleting employee:', employeeId)
 				await deleteEmployee(employeeId)
-				// Refresh the search results after deletion
-				await performSearch()
+
+				// After deletion, remove the employee from the local state immediately
+				// This provides instant feedback without waiting for a server refresh
+				setEmployees((prev) => prev.filter((emp) => emp.id !== employeeId))
+				setTotalEmployees((prev) => prev - 1)
+
 				console.log('✅ Employee deleted successfully')
 				toast.success('Employee deleted successfully!')
 			} catch (err) {
@@ -195,6 +252,52 @@ export const EmployeesPage = () => {
 	// Toggle sort direction
 	const toggleSortDirection = () => {
 		setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+	}
+
+	// Pagination controls - only show when browsing all employees (no filters active)
+	const PaginationControls = () => {
+		// Check if any filters are active
+		const hasActiveFilters =
+			searchTerm ||
+			contractFilter !== 'ALL' ||
+			employmentFilter !== 'ALL' ||
+			statusFilter !== 'ALL'
+
+		// Don't show pagination when filters are active
+		if (hasActiveFilters) {
+			return null
+		}
+
+		// Only show pagination controls when browsing all employees
+		return (
+			<div className='flex items-center justify-between mt-6'>
+				<div className='text-sm text-gray-600'>
+					Showing page {currentPage + 1} of {totalPages} ({employees.length} of{' '}
+					{totalEmployees} employees)
+				</div>
+				<div className='flex items-center space-x-2'>
+					<Button
+						variant='ghost'
+						size='sm'
+						onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
+						disabled={currentPage === 0}>
+						Previous
+					</Button>
+					<span className='text-sm'>
+						Page {currentPage + 1} of {totalPages}
+					</span>
+					<Button
+						variant='ghost'
+						size='sm'
+						onClick={() =>
+							setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1))
+						}
+						disabled={currentPage >= totalPages - 1}>
+						Next
+					</Button>
+				</div>
+			</div>
+		)
 	}
 
 	/* ------------------------------- RENDER UI -------------------------------- */
@@ -371,17 +474,20 @@ export const EmployeesPage = () => {
 
 				{/* Employees Grid */}
 				{employees.length > 0 ? (
-					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-						{employees.map((employee) => (
-							<EmployeeCard
-								key={employee.id}
-								employee={employee}
-								onView={handleViewEmployee}
-								onEdit={handleEditEmployee}
-								onDelete={handleDeleteEmployee}
-							/>
-						))}
-					</div>
+					<>
+						<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+							{employees.map((employee) => (
+								<EmployeeCard
+									key={employee.id}
+									employee={employee}
+									onView={handleViewEmployee}
+									onEdit={handleEditEmployee}
+									onDelete={handleDeleteEmployee}
+								/>
+							))}
+						</div>
+						<PaginationControls />
+					</>
 				) : (
 					/* Empty State */
 					<div className='bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center'>

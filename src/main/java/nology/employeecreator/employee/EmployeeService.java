@@ -69,13 +69,7 @@ public class EmployeeService {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         // Step 4: Execute database query with all filters, sorting, and pagination
-        Page<Employee> employeePage = employeeRepository.findWithFilters(
-                firstName, // Will search both firstName and lastName
-                contractTypeEnum, // null = no filter, value = exact match
-                employmentBasisEnum, // null = no filter, value = exact match  
-                isActive, 
-                pageable // Handles pagination + sorting
-        );
+        Page<Employee> employeePage = employeeRepository.findWithFilters(pageable);
 
         // Step 5: Convert Page<Employee> to Page<EmployeeResponseDTO>
         // map() transforms each Employee entity to EmployeeResponseDTO
@@ -168,6 +162,25 @@ private Sort createSort(String sortBy, String sortDirection) {
         // convert list to stream then map each employee to EmployeeResponseDTO
         return employees.stream().map(this::convertToResponseDTO).collect(Collectors.toList());
         }
+
+    /* -------------------------- READ ALL WITH PAGINATION ----------------------- */
+    // NEW: Get all employees with pagination support for better UI experience
+    // This method enables "10 per page" functionality on the frontend
+    public Page<EmployeeResponseDTO> getAllEmployeesPaginated(int page, int size, String sortBy, String sortDirection) {
+        // Step 1: Create Sort object based on direction parameter
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort sort = Sort.by(direction, sortBy);
+        
+        // Step 2: Create Pageable object with page, size, and sort parameters
+        Pageable pageable = PageRequest.of(page, size, sort);
+        
+        // Step 3: Query database with pagination - returns Page<Employee>
+        Page<Employee> employeePage = employeeRepository.findAll(pageable);
+        
+        // Step 4: Convert Page<Employee> to Page<EmployeeResponseDTO>
+        // The map() method preserves pagination metadata (totalPages, totalElements, etc.)
+        return employeePage.map(this::convertToResponseDTO);
+    }
 
 
     /* -------------------------------- READ ONE -------------------------------- */
