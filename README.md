@@ -33,7 +33,7 @@ Talent Forge is a modern, full-stack employee management system that transforms 
 
 ## Screenshots 
 ### Dashboard showing visualisation and key numbers of employee data
-<img alt="image" src="https://github.com/user-attachments/assets/f4459f51-a97d-44fd-a861-642866377384" width="800"/>
+<img alt="image" src="https://github.com/user-attachments/assets/340122f1-42c9-4ba4-b9b6-37ecf7343c40" width="800" />
 
 ### Employees list (active and in-active displayed)
 <img alt="image" src="https://github.com/user-attachments/assets/d5a050bd-c8e5-4c6d-82cf-3f7c3e1e90b8" width="800"/>
