@@ -1,5 +1,5 @@
 import { MdDelete, MdEdit, MdVisibility } from 'react-icons/md'
-import type { Employee } from '../services/employees'
+import type { Employee } from '../../services/employees'
 
 //props accepted by Employeecards
 interface EmployeeCardProps {

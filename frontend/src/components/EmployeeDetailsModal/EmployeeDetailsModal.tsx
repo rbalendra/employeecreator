@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import type { Employee } from '../services/employees'
+import type { Employee } from '../../services/employees'
 import {
 	MdEmail,
 	MdPhone,

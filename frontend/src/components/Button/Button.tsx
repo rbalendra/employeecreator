@@ -6,7 +6,7 @@ interface ButtonProps {
 	size?: 'sm' | 'md' | 'lg'
 
 	// state prop
-	isActive?: boolean   // is the button
+	isActive?: boolean // is the button
 	disabled?: boolean
 
 	//behaviour prop
@@ -70,7 +70,7 @@ export const Button = ({
 
 	// Overwrite all other styles when disabled
 	const disabledStyles =
-		'opacity-50 cursor-not-allowed hover:bg-current hover:border-current hover:shadow-none'
+		'opacity-50 cursor-not-allowed hover:border-current hover:shadow-none'
 
 	// Build the final class string based on prop values
 	const buttonClasses = `

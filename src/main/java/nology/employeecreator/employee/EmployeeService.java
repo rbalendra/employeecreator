@@ -27,6 +27,7 @@ public class EmployeeService {
     // Database-level search with pagination and sorting
     public Page<EmployeeResponseDTO> advancedSearchWithPagination(
             String firstName,           // Search term for name
+            String lastName,            // Search term for name
             String contractType,        // Filter: contract type
             String employmentBasis,     // Filter: employment basis  
             Boolean ongoing,            // Filter: ongoing status
@@ -69,7 +70,7 @@ public class EmployeeService {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         // Step 4: Execute database query with all filters, sorting, and pagination
-        Page<Employee> employeePage = employeeRepository.findWithFilters(pageable);
+        Page<Employee> employeePage = employeeRepository.findWithFilters(firstName, lastName, contractTypeEnum, employmentBasisEnum, isActive, pageable);
 
         // Step 5: Convert Page<Employee> to Page<EmployeeResponseDTO>
         // map() transforms each Employee entity to EmployeeResponseDTO
@@ -311,12 +312,6 @@ private Sort createSort(String sortBy, String sortDirection) {
         
         return response;
     }
-
-
-
-
-
-
 }
 
 

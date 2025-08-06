@@ -1,21 +1,25 @@
 import { useState, useEffect } from 'react'
-import { StatCard } from './StatCard'
-import { EmployeeCard } from './EmployeeCard'
-import { EmployeeDetailsModal } from './EmployeeDetailsModal'
-import { Button } from './Button'
+import { StatCard } from '../StatCard'
+import { EmployeeCard } from '../EmployeeCard/EmployeeCard'
+import { EmployeeDetailsModal } from '../EmployeeDetailsModal/EmployeeDetailsModal'
+import { Button } from '../Button/Button'
 import {
 	getDashboardStats,
 	getAllEmployeesSimple,
 	type Employee,
-} from '../services/employees'
+} from '../../services/employees'
 import {
 	MdPeople,
 	MdRefresh,
 	MdPersonAdd,
 	MdArrowForward,
+	MdWork,
+	MdAccessTime,
+	MdBusiness,
+	MdDescription,
 } from 'react-icons/md'
 import { useNavigate } from 'react-router'
-import { EmployeeChart } from './EmployeeChart'
+import { EmployeeChart } from '../EmployeeChart/EmployeeChart'
 
 export const Dashboard = () => {
 	// State for dashboard data
@@ -254,35 +258,35 @@ export const Dashboard = () => {
 					<StatCard
 						title='Total Employees'
 						value={stats.totalEmployees}
-						icon='👥'
+						icon={<MdPeople size='50' />}
 						bgColor='border-orange-500 border-2 '
 						textColor='text-black'
 					/>
 					<StatCard
 						title='Full Time'
 						value={stats.fullTimeCount}
-						icon='💼'
+						icon={<MdWork size='50' />}
 						bgColor='border-green-500 border-2 '
 						textColor='text-black'
 					/>
 					<StatCard
 						title='Part Time'
 						value={stats.partTimeCount}
-						icon='⏰'
+						icon={<MdAccessTime size='50' />}
 						bgColor='border-indigo-500 border-2'
 						textColor='text-black'
 					/>
 					<StatCard
 						title='Permanent'
 						value={stats.permanentCount}
-						icon='🏢'
+						icon={<MdBusiness size='50' />}
 						bgColor='border-purple-500 border-2'
 						textColor='text-black'
 					/>
 					<StatCard
 						title='Contract'
 						value={stats.contractCount}
-						icon='📄'
+						icon={<MdDescription size='50' />}
 						bgColor='border-yellow-500 border-2'
 						textColor='text-black'
 					/>

@@ -39,6 +39,7 @@ public class EmployeeController {
 @GetMapping("/search")
 public Page<EmployeeResponseDTO> searchEmployees(
     @RequestParam(required=false) String firstName,
+    @RequestParam(required=false) String lastName,
     @RequestParam(required=false) String contractType,
     @RequestParam(required=false) String employmentBasis,
     @RequestParam(required=false) Boolean ongoing,
@@ -52,13 +53,10 @@ public Page<EmployeeResponseDTO> searchEmployees(
     @RequestParam(required = false, defaultValue = "10") int size      // Items per page
         
 ) {
-     System.out.println("GET /api/employees/search called with pagination");
-        System.out.println("Page: " + page + ", Size: " + size + ", Sort: " + sortBy + " " + sortDirection);
-        System.out.println("Filters - firstName: " + firstName + ", contractType: " + contractType + 
-                          ", employmentBasis: " + employmentBasis + ", ongoing: " + ongoing);
     
     return employeeService.advancedSearchWithPagination(
            firstName,          // Search term (works for both first and last name)
+            lastName,
             contractType,       // Contract type filter
             employmentBasis,    // Employment basis filter
             ongoing,            // Ongoing status filter

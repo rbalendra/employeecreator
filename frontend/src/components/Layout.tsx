@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router'
-import { Navbar } from './Navbar'
+import { Navbar } from './Navbar/Navbar'
 
 // LAYOUT COMPONENT: This is a wrapper that puts the navbar on every page
 interface LayoutProps {

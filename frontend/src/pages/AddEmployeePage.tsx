@@ -12,7 +12,7 @@ import {
 	type UpdateEmployeeDTO,
 } from '../services/employees'
 import { MdArrowBack, MdPersonAdd, MdSave, MdEdit } from 'react-icons/md'
-import { Button } from '../components/Button'
+import { Button } from '../components/Button/Button'
 
 //Cloudinary import for profile images
 import { uploadUrl, uploadPreset, cloudName } from '../config/cloudinary'

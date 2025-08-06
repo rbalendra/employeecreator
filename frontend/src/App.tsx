@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router'
 import { Layout } from './components/Layout'
-import { Dashboard } from './components/Dashboard'
+import { Dashboard } from './components/Dashboard/Dashboard'
 import { EmployeesPage } from './pages/EmployeesPage'
 import { AddEmployeePage } from './pages/AddEmployeePage'
 import { Toaster } from 'react-hot-toast'

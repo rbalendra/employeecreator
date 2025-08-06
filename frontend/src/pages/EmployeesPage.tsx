@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
-import { Button } from '../components/Button'
-import { EmployeeCard } from '../components/EmployeeCard'
-import { EmployeeDetailsModal } from '../components/EmployeeDetailsModal'
+import { Button } from '../components/Button/Button'
+import { EmployeeCard } from '../components/EmployeeCard/EmployeeCard'
+import { EmployeeDetailsModal } from '../components/EmployeeDetailsModal/EmployeeDetailsModal'
 import { toast } from 'react-hot-toast'
 
+//service functions & types for employee API calls
 import {
 	getAllEmployees,
 	searchEmployees,
@@ -13,6 +14,7 @@ import {
 	type EmployeeSearchParams,
 } from '../services/employees'
 
+//Icons for UI
 import {
 	MdPeople,
 	MdPersonAdd,
@@ -21,6 +23,7 @@ import {
 	MdFilterList,
 } from 'react-icons/md'
 
+//type for paginated API responses
 export interface PagedResponse<T> {
 	content: T[]
 	totalPages: number
@@ -31,26 +34,27 @@ export interface PagedResponse<T> {
 	last: boolean
 }
 
+//Main employees page component
 export const EmployeesPage = () => {
 	const navigate = useNavigate()
 
-	// State management
+	/* --------------------------- // State variables --------------------------- */
 	const [employees, setEmployees] = useState<Employee[]>([]) // Current displayed employees
 	const [loading, setLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
+	/* ----------------------- // Filter and sort controls ---------------------- */
 	const [searchTerm, setSearchTerm] = useState('')
 	const [contractFilter, setContractFilter] = useState<string>('ALL') //filter contract type
 	const [employmentFilter, setEmploymentFilter] = useState<string>('ALL') //filter full/part time
 	const [statusFilter, setStatusFilter] = useState<string>('ALL') // filter active/inactive
 	const [sortBy, setSortBy] = useState<string>('firstName') // field to sort by
 	const [sortDirection, setSortDirection] = useState<string>('asc') // asc & desc
-	//for pagination
+	/* -------------------------- //Pagination details -------------------------- */
 	const [currentPage, setCurrentPage] = useState(0)
 	const [pageSize] = useState(9)
 	const [totalPages, setTotalPages] = useState(0)
 	const [totalEmployees, setTotalEmployees] = useState(0)
-
-	// Modal state
+	/* ------------------- // Modal state for employee details ------------------ */
 	const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
 		null
 	)
@@ -68,7 +72,7 @@ export const EmployeesPage = () => {
 					setLoading(true)
 					setError(null)
 
-					// Check if ANY filters are active
+					// determine if any filter/search is applied
 					const hasActiveFilters =
 						searchTerm ||
 						contractFilter !== 'ALL' ||
@@ -76,8 +80,8 @@ export const EmployeesPage = () => {
 						statusFilter !== 'ALL'
 
 					if (!hasActiveFilters) {
-						// NO FILTERS: Use paginated getAllEmployees for browsing
-						// This gives us 10 employees per page with next/previous buttons
+						// NO FILTERS: load one page
+						// This gives us 9 employees per page with next/previous buttons
 						console.log('📄 Fetching paginated employees (browsing mode):', {
 							currentPage,
 							pageSize,
@@ -97,9 +101,6 @@ export const EmployeesPage = () => {
 					} else {
 						// FILTERS ACTIVE: Use search endpoint and show ALL results on one page
 						// This returns all matching employees without pagination
-						console.log(
-							'🔍 Performing filtered search (all results on one page)'
-						)
 						const searchParams: EmployeeSearchParams = {
 							contractType:
 								contractFilter !== 'ALL' ? contractFilter : undefined,
@@ -115,7 +116,7 @@ export const EmployeesPage = () => {
 						const searchResults = await searchEmployees({
 							...searchParams,
 							page: 0, // Always first page
-							size: 1000, // Large size to get all matching results
+							size: 50, // Large size to get all matching results
 						})
 
 						// Set the search results - no pagination for filtered results
@@ -192,12 +193,9 @@ export const EmployeesPage = () => {
 				// This provides instant feedback without waiting for a server refresh
 				setEmployees((prev) => prev.filter((emp) => emp.id !== employeeId))
 				setTotalEmployees((prev) => prev - 1)
-
-				console.log('✅ Employee deleted successfully')
 				toast.success('Employee deleted successfully!')
 			} catch (err) {
-				console.error('❌ Error deleting employee:', err)
-				alert('Failed to delete employee. Please try again.')
+				alert('Failed to delete employee. Please try again. ' + err)
 			}
 		}
 	}
@@ -243,13 +241,13 @@ export const EmployeesPage = () => {
 		}
 	}
 
-	// Handle sort change
+	// Update sort field
 	const handleSortChange = (newSortBy: string) => {
 		const fieldName = getSortFieldName(newSortBy)
 		setSortBy(fieldName)
 	}
 
-	// Toggle sort direction
+	// Toggle sort direction asc/desc
 	const toggleSortDirection = () => {
 		setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
 	}
@@ -275,7 +273,7 @@ export const EmployeesPage = () => {
 					Showing page {currentPage + 1} of {totalPages} ({employees.length} of{' '}
 					{totalEmployees} employees)
 				</div>
-				<div className='flex items-center space-x-2'>
+				<div className='flex items-center space-x-3'>
 					<Button
 						variant='ghost'
 						size='sm'
@@ -283,7 +281,7 @@ export const EmployeesPage = () => {
 						disabled={currentPage === 0}>
 						Previous
 					</Button>
-					<span className='text-sm'>
+					<span className='text-sm px-3'>
 						Page {currentPage + 1} of {totalPages}
 					</span>
 					<Button

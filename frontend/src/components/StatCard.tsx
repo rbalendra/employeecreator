@@ -1,8 +1,10 @@
+import React from 'react'
+
 // StatCard: reusable card to display a statistic with title, value, and icon
 interface StatCardProps {
 	title: string
 	value: number
-	icon?: string
+	icon?: React.ReactNode
 	bgColor?: string
 	textColor?: string
 }
@@ -10,7 +12,7 @@ interface StatCardProps {
 export const StatCard = ({
 	title,
 	value,
-	icon = '👥',
+	icon,
 	bgColor = 'bg-white',
 	textColor = 'text-gray-900',
 }: StatCardProps) => {
