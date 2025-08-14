@@ -7,22 +7,25 @@ export const employeeSchema = z
 		email: z.string().email('Please enter a valid email address'),
 		mobileNumber: z
 			.string()
-			.min(10, 'Mobile number must be at least 10 digits'),
+			.regex(
+				/^\d{10,}$/,
+				'Mobile number must contain only digits and be at least 10 characters'
+			),
 		residentialAddress: z.string().min(5, 'Please enter a valid address'),
 		middleName: z.string().optional(),
 		contractType: z.enum(['PERMANENT', 'CONTRACT'], {
-			errorMap: () => ({ message: 'Please select a contract type' }),
+			message: 'Please select a contract type',
 		}),
 		employmentBasis: z.enum(['FULL_TIME', 'PART_TIME'], {
-			errorMap: () => ({ message: 'Please select employment basis' }),
+			message: 'Please select employment basis',
 		}),
-		startDate: z.string().min(1, 'Start date is required'),
-		finishDate: z.string().optional(),
+		startDate: z.date({ message: 'Start date is required' }),
+		finishDate: z.date().optional(),
 		ongoing: z.boolean(),
 		role: z.enum(
 			['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE', 'INTERN', 'CONTRACTOR'],
 			{
-				errorMap: () => ({ message: 'Please select a role' }),
+				message: 'Please select a role',
 			}
 		),
 		hoursPerWeek: z
