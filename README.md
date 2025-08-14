@@ -82,7 +82,7 @@ Before running the application, ensure you have:
 - 📦 Apache Maven 3.6+
 - 🐬 MySQL 8.0+
 - 🟢 Node.js 18+
-- 📱 npm or yarn
+- 📱 npm
 
 #### 🧩 Backend Setup (Spring Boot)
 
