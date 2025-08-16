@@ -27,8 +27,9 @@ export const generateProfileImage = async (
 	//different descriptions depending on the style chosen
 	const stylePrompts = {
 		professional: 'wearing business suit, office setting, confident expression',
-		casual: 'wearing smart casual clothing, friendly expression, relaxed pose',
-		fun: 'wearing business suit with colorful tie and playful expression, quirky accessories, vibrant background',
+		casual:
+			'wearing relaxed smart casual clothing, friendly expression, relaxed pose',
+		fun: 'wearing business suit with colorful tie, sunglasses, funky hairstyles and playful expression, quirky accessories, vibrant background',
 		creative:
 			'wearing artistic outfit, creative studio background, expressive pose, colorful lighting, unique styling',
 	}
@@ -37,9 +38,6 @@ export const generateProfileImage = async (
 	const creativeOptions = [
 		'in The Simpsons cartoon style, yellow skin, simple cartoon features, wearing business suit, Springfield office background',
 		'in Family Guy cartoon style, exaggerated cartoon features, wearing professional attire, Quahog office setting',
-		'in SpongeBob SquarePants cartoon style, colorful cartoon character, wearing tie and shirt, underwater office background',
-		'in South Park cartoon style, simple round cartoon face, wearing business clothes, paper cutout animation style',
-		"in Bob's Burgers cartoon style, quirky cartoon features, wearing apron or business casual, restaurant/office setting",
 		'in Pixar 3D animation style, 3D cartoon character, wearing modern business attire, colorful corporate background',
 	]
 
