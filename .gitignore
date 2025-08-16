@@ -34,5 +34,6 @@ build/
 
 
 *.env
+*.pem
 
 node_modules

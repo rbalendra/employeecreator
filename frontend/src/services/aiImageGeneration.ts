@@ -3,7 +3,7 @@
 /* ------ This describes the options we can pass to the image generator ----- */
 export interface GenerateImageOptions {
 	gender: 'male' | 'female'
-	style?: 'professional' | 'casual' | 'corporate'
+	style?: 'professional' | 'casual' | 'fun' | 'creative'
 	seed?: number //may need this number to make results repeatable
 }
 
@@ -18,22 +18,40 @@ export interface GeneratedImage {
 export const generateProfileImage = async (
 	options: GenerateImageOptions
 ): Promise<GeneratedImage> => {
-	//pull out the values from options, with default style "profressional"
+	//pull out the values from options, with default style "professional"
 	const { gender, style = 'professional', seed } = options
 
 	//basic description of what we want the AI to create
-	const basePrompt = `professional headshot portrait of ${gender} business person, corporate attire, clean background, high quality, realistic, well-lit`
+	const basePrompt = `headshot portrait of ${gender} person, clean background, high quality, realistic, well-lit`
 
 	//different descriptions depending on the style chosen
 	const stylePrompts = {
 		professional: 'wearing business suit, office setting, confident expression',
-		casual: 'wearing smart casual clothing, friendly expression',
-		corporate:
-			'wearing formal business attire, executive style, serious expression',
+		casual: 'wearing smart casual clothing, friendly expression, relaxed pose',
+		fun: 'wearing business suit with colorful tie and playful expression, quirky accessories, vibrant background',
+		creative:
+			'wearing artistic outfit, creative studio background, expressive pose, colorful lighting, unique styling',
 	}
 
+	// For creative style, randomly select from fun creative options
+	const creativeOptions = [
+		'in The Simpsons cartoon style, yellow skin, simple cartoon features, wearing business suit, Springfield office background',
+		'in Family Guy cartoon style, exaggerated cartoon features, wearing professional attire, Quahog office setting',
+		'in SpongeBob SquarePants cartoon style, colorful cartoon character, wearing tie and shirt, underwater office background',
+		'in South Park cartoon style, simple round cartoon face, wearing business clothes, paper cutout animation style',
+		"in Bob's Burgers cartoon style, quirky cartoon features, wearing apron or business casual, restaurant/office setting",
+		'in Pixar 3D animation style, 3D cartoon character, wearing modern business attire, colorful corporate background',
+	]
+
+	let stylePrompt = stylePrompts[style]
+
+	// If creative style is selected, randomly pick one of the creative options
+	if (style === 'creative') {
+		const randomIndex = Math.floor(Math.random() * creativeOptions.length)
+		stylePrompt = creativeOptions[randomIndex]
+	}
 	//combine the basic prompt with the chosen style
-	const fullPrompt = `${basePrompt}, ${stylePrompts[style]}`
+	const fullPrompt = `${basePrompt}, ${stylePrompt}`
 	console.log(fullPrompt)
 
 	//encode the text so it can be safely used in the ULR
@@ -41,7 +59,8 @@ export const generateProfileImage = async (
 	console.log(encodedPrompt)
 
 	//if a seed was provided, add it to the URL to make the image consistent
-	const seedParam = seed ? `&seed=${seed}` : ''
+	//if no seed provided use current timestamp to get a unique image
+	const seedParam = seed ? `&seed=${seed}` : `&seed=${Date.now()}`
 
 	// build the full API request URL for Pollinations API
 	const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512${seedParam}&nologo=true`

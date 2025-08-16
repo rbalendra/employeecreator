@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { employeeSchema, type EmployeeFormData } from './schema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -11,11 +11,21 @@ import {
 	type CreateEmployeeDTO,
 	type UpdateEmployeeDTO,
 } from '../services/employees'
-import { MdArrowBack, MdPersonAdd, MdSave, MdEdit } from 'react-icons/md'
+import {
+	MdArrowBack,
+	MdPersonAdd,
+	MdSave,
+	MdEdit,
+	MdRefresh,
+} from 'react-icons/md'
+import { ImMagicWand } from 'react-icons/im'
 import { Button } from '../components/Button/Button'
 
 //Cloudinary import for profile images
 import { uploadUrl, uploadPreset, cloudName } from '../config/cloudinary'
+
+//modal that generates AI headshot and returns the image blob
+import AIImageModal from '../components/AIImageModal/AIImageModal'
 
 export const AddEmployeePage = () => {
 	// Extract navigation function and route parameters
@@ -26,6 +36,10 @@ export const AddEmployeePage = () => {
 	// Loading state for async operations (fetching employee data for editing)
 	const [loading, setLoading] = useState(false)
 
+	//AI modal open/close + a transition to keep UI responsive while uploading AI image
+	const [isAIModalOpen, setIsAIModalOpen] = useState(false)
+	const [isUploadPending, startUploadTransition] = useTransition()
+
 	/**
 	 * React Hook Form Configuration
 	 *
@@ -35,11 +49,12 @@ export const AddEmployeePage = () => {
 	 * - Form state management (errors, submission state, etc.)
 	 */
 	const {
-		register,
-		handleSubmit,
-		formState: { errors, isSubmitting },
-		reset,
-		watch,
+		register, // connects inputs to the form state
+		handleSubmit, // wraps submit handler with validation
+		formState: { errors, isSubmitting }, //validation errors and submission state
+		reset, // replace all form values with new data
+		watch, // read live values from the form
+		setValue, // add setValue to destructuring
 	} = useForm<EmployeeFormData>({
 		resolver: zodResolver(employeeSchema),
 		defaultValues: {
@@ -69,6 +84,52 @@ export const AddEmployeePage = () => {
 	 */
 	const [uploading, setUploading] = useState(false)
 	const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+
+	/**
+	 * When the AI modal returns a blog, we upload that file to clodinary
+	 * if upload succeeeds, we store the return ULR into the form ('thumbnailUrl') and show a preview
+	 */
+	const handleAIImageSelect = async (imageBlob: Blob) => {
+		startUploadTransition(async () => {
+			try {
+				console.log('Uploading AI generated image to Cloudinary...')
+
+				//build form-data required for clodinary upload
+				const formData = new FormData()
+				formData.append('file', imageBlob, 'ai-generated-profile.jpg') // add the blob with a filename
+				formData.append('upload_preset', uploadPreset) // your unsigned upload preset
+				formData.append('cloud_name', cloudName) // your Cloudinary cloud name
+				formData.append('resource_type', 'image') // specify this is an image upload
+
+				//upload to cloudinary
+				const response = await fetch(uploadUrl, {
+					method: 'POST',
+					body: formData,
+				})
+
+				if (!response.ok) {
+					const errorData = await response.json()
+					console.error('Cloudinary upload failed:', errorData)
+					toast.error('Failed to upload AI image. Please try again.')
+					return
+				}
+
+				const data = await response.json()
+				console.log('Cloudinary response:', data)
+
+				if (data.secure_url) {
+					setValue('thumbnailUrl', data.secure_url) // update form with the image URL
+					setPreviewUrl(data.secure_url) // set preview URL for immediate display
+					toast.success('AI profile image uploaded successfully!')
+				} else {
+					throw new Error('No secure_url in response')
+				}
+			} catch (error) {
+				console.error('Error uploading AI image:', error)
+				toast.error('Failed to upload AI image. Please try again.')
+			}
+		})
+	}
 
 	/**
 	 * Handle profile photo upload to Cloudinary
@@ -201,6 +262,11 @@ export const AddEmployeePage = () => {
 					thumbnailUrl: employee.thumbnailUrl || '',
 				})
 
+				// Set preview URL if employee has a profile photo
+				if (employee.thumbnailUrl) {
+					setPreviewUrl(employee.thumbnailUrl)
+				}
+
 				console.log('✅ Employee data loaded for editing')
 			} catch (error) {
 				console.error('❌ Error loading employee data:', error)
@@ -236,15 +302,17 @@ export const AddEmployeePage = () => {
 				`${isEditing ? 'Updating' : 'Creating'} employee with data:`,
 				data
 			)
+			console.log('Is editing:', isEditing, 'ID:', id)
 
 			if (data.ongoing) {
-				console.log('Employee marked as ongoing - learing finish date')
+				console.log('Employee marked as ongoing - clearing finish date')
 			} else if (data.finishDate) {
-				console.log('Employee finish date: ', data.finishDate)
+				console.log('Employee finish date:', data.finishDate)
 			}
 
 			if (isEditing && id) {
 				// UPDATE EXISTING EMPLOYEE
+				console.log('Starting employee update...')
 				// Transform form data to match the UpdateEmployeeDTO interface
 				// Convert empty strings to undefined for optional fields
 				const updateData: UpdateEmployeeDTO = {
@@ -256,12 +324,15 @@ export const AddEmployeePage = () => {
 					hoursPerWeek: data.hoursPerWeek || undefined,
 				}
 
-				await updateEmployee(Number(id), updateData)
+				console.log('Update data being sent:', updateData)
+				const result = await updateEmployee(Number(id), updateData)
+				console.log('Update result:', result)
 				toast.success(
 					`${data.firstName} ${data.lastName} updated successfully!`
 				)
 			} else {
 				// CREATE NEW EMPLOYEE
+				console.log('Starting employee creation...')
 				// Transform form data to match the CreateEmployeeDTO interface
 				// Convert empty strings to undefined for optional fields
 				const employeeData: CreateEmployeeDTO = {
@@ -273,18 +344,28 @@ export const AddEmployeePage = () => {
 					hoursPerWeek: data.hoursPerWeek || undefined,
 				}
 
-				await createEmployee(employeeData)
+				console.log('Create data being sent:', employeeData)
+				const result = await createEmployee(employeeData)
+				console.log('Create result:', result)
 				toast.success('Employee created successfully!')
 				reset() // Only reset form when creating new employee
 			}
 
 			// Redirect to employees list page after successful operation
+			console.log('Operation successful, navigating to /employees')
 			navigate('/employees')
 		} catch (error) {
 			console.error(
 				`Error ${isEditing ? 'updating' : 'creating'} employee:`,
 				error
 			)
+
+			// More detailed error logging
+			if (error instanceof Error) {
+				console.error('Error message:', error.message)
+				console.error('Error stack:', error.stack)
+			}
+
 			toast.error(
 				`Failed to ${
 					isEditing ? 'update' : 'create'
@@ -442,6 +523,27 @@ export const AddEmployeePage = () => {
 											className='block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-1 file:border-gray-300 file:text-sm file:font-medium file:bg-blue-50 file:text-slate-700 hover:file:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed'
 										/>
 
+										{/* AI Image Generation Button */}
+										<div className='flex items-center gap-2 py-3'>
+											<button
+												type='button'
+												onClick={() => setIsAIModalOpen(true)}
+												disabled={isUploadPending}
+												className='inline-flex items-center gap-2 py-2 px-4 rounded-lg border border-gray-300 text-sm font-medium bg-blue-50 text-slate-700 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'>
+												{isUploadPending ? (
+													<MdRefresh className='w-4 h-4 animate-spin' />
+												) : (
+													<ImMagicWand className='w-4 h-4' />
+												)}
+												{isUploadPending
+													? 'Processing...'
+													: 'Generate AI Image'}
+											</button>
+											<span className='text-sm text-gray-500'>
+												Generate AI image
+											</span>
+										</div>
+
 										{/* Upload Status */}
 										{uploading && (
 											<div className='flex items-center text-sm text-blue-600'>
@@ -453,7 +555,7 @@ export const AddEmployeePage = () => {
 										{/* Help Text */}
 										<p className='text-xs text-gray-500'>
 											Upload a profile photo (JPG, PNG, GIF). Maximum file size:
-											5MB. ( Make sure your face is visible )
+											5MB.
 										</p>
 									</div>
 
@@ -686,10 +788,10 @@ export const AddEmployeePage = () => {
 								Cancel
 							</Button>
 							<Button
-								onClick={handleSubmit(onSubmit)}
 								variant='secondary'
 								disabled={isSubmitting}
-								isActive={true}>
+								isActive={true}
+								onClick={handleSubmit(onSubmit)}>
 								{isSubmitting ? (
 									<>
 										<div className='animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent '></div>
@@ -708,6 +810,11 @@ export const AddEmployeePage = () => {
 					</form>
 				</div>
 			</div>
+			<AIImageModal
+				isOpen={isAIModalOpen}
+				onClose={() => setIsAIModalOpen(false)}
+				onImageSelect={handleAIImageSelect}
+			/>
 		</div>
 	)
 }

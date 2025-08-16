@@ -60,6 +60,9 @@ export const EmployeesPage = () => {
 	)
 	const [isModalOpen, setIsModalOpen] = useState(false)
 
+
+
+
 	/* --------------------------- DATA FETCHING & FILTER HANDLING ---------------------------- */
 
 	// This is the primary effect for fetching data. It runs whenever any dependency changes.

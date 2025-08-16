@@ -19,8 +19,24 @@ export const employeeSchema = z
 		employmentBasis: z.enum(['FULL_TIME', 'PART_TIME'], {
 			message: 'Please select employment basis',
 		}),
-		startDate: z.date({ message: 'Start date is required' }),
-		finishDate: z.date().optional(),
+		startDate: z
+			.string()
+			.min(1, 'Start date is required')
+			.refine(
+				(date) => {
+					// Check if date is in valid format (YYYY-MM-DD)
+					const dateRegex = /^\d{4}-\d{2}-\d{2}$/
+					if (!dateRegex.test(date)) return false
+
+					// Check if it's a valid date
+					const parsedDate = new Date(date)
+					return !isNaN(parsedDate.getTime())
+				},
+				{
+					message: 'Please enter a valid date',
+				}
+			),
+		finishDate: z.string().optional(),
 		ongoing: z.boolean(),
 		role: z.enum(
 			['ADMIN', 'HR', 'MANAGER', 'EMPLOYEE', 'INTERN', 'CONTRACTOR'],
@@ -38,9 +54,16 @@ export const employeeSchema = z
 	.refine(
 		(data) => {
 			// Only validate finish date if ongoing is false and finishDate is provided
-			if (!data.ongoing && data.finishDate) {
+			if (!data.ongoing && data.finishDate && data.finishDate.trim() !== '') {
+				// Ensure both dates are valid before comparison
 				const startDate = new Date(data.startDate)
 				const finishDate = new Date(data.finishDate)
+
+				// Check if dates are valid
+				if (isNaN(startDate.getTime()) || isNaN(finishDate.getTime())) {
+					return false
+				}
+
 				return finishDate > startDate
 			}
 			return true
