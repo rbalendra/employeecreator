@@ -171,6 +171,19 @@ mvn test
 - **Responsive Chart Design:** Making Recharts responsive across different screen sizes
 - **Type Safety:** Maintaining strict TypeScript typing across complex form data and API responses
 
+
+## Recent Implementation of [Pollination AI](https://pollinations.ai)
+- Text-to-Image Generation: Integrated Pollinations AI API for generating professional employee avatars and creative portraits
+- Pre-defined Style Options: Three one-click generation styles - Male Professional, Female Professional, and Creative Artistic portraits
+- Real-time Processing: Fetch-based service layer handles API calls with loading states and error handling
+- Form Integration: Generated images automatically populate the employee thumbnail field in the creation form
+- No API Key Required: Utilises Pollinations' free tier for seamless image generation without authentication
+
+
+https://github.com/user-attachments/assets/7e8117fe-431a-4622-bf77-1ecb864890b7
+
+
+
 ## Areas for Growth
 
 ### 🔐 Authentication & Authorization
