@@ -1,4 +1,4 @@
-# [Talent Forge](emptalentforge.netlify.app)
+# [Talent Forge](https://emptalentforge.netlify.app/)
 
 ### Table of Contents
 - [🔍 Overview](#Overview)
