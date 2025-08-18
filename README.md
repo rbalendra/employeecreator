@@ -8,7 +8,7 @@
 - [📸 Screenshots](#Screenshots)
 - [⚙️ Installation Guide](#installation-guide)
 - [🧩 Challenges](#Challenges)
-- [🤖 AI Implementation](#Recent Implementation of [Pollination AI](https://pollinations.ai))
+- [🤖 Recent Implementation of Pollination AI](#recent-implementation-of-pollination-ai)
 - [🚀 Areas for Growth](#Areas-for-growth)
 
 ## Overview
