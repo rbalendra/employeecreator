@@ -1,17 +1,21 @@
-import { useState, useTransition } from 'react'
+import { useState, useTransition } from 'react' //useTranstion: for marking slow/async updates as non-urgent to keep UI responsive
 import {
 	generateProfileImage,
 	downloadGeneratedImage,
 } from '../../services/aiImageGeneration'
+
 import type {
 	GenerateImageOptions,
 	GeneratedImage,
 } from '../../services/aiImageGeneration'
+
 import toast from 'react-hot-toast'
+
 import { MdRefresh, MdDownload } from 'react-icons/md'
 import { IoClose } from 'react-icons/io5'
 import { ImMagicWand } from 'react-icons/im'
-interface AIImageModalProps {
+
+interface AIImageModalProps { 
 	isOpen: boolean
 	onClose: () => void
 	onImageSelect: (imageBlob: Blob) => void //callback when user selects an image
@@ -22,7 +26,7 @@ const AIImageModal = ({
 	onClose,
 	onImageSelect,
 }: AIImageModalProps) => {
-	//holds a list of generated AI images
+	//holds a list of generated AI images in an Array
 	const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([])
 
 	//stores user's chosen options for the AI image
@@ -39,10 +43,11 @@ const AIImageModal = ({
 
 	// Generate a single image
 	const handleGenerateImage = () => {
+		// Wrap async logic in startTransition so React can keep the UI interactive.
 		startTransition(async () => {
 			try {
 				console.log('Generating image with options:', selectedOptions)
-
+				// Call the AI service to generate an image based on selected options
 				const image = await generateProfileImage(selectedOptions)
 				setGeneratedImages([image])
 			} catch (error) {
@@ -52,16 +57,18 @@ const AIImageModal = ({
 		})
 	}
 
-	// Use the generated image (download and pass to parent)
+	/* -------- Use the generated image (download and pass to parent) -------- */
 	const handleUseGeneratedImage = () => {
+		// no image? nothing to do
 		if (generatedImages.length === 0) return
 
 		startTransition(async () => {
 			try {
 				setIsDownloading(true)
 				console.log('📥 Downloading generated image:', generatedImages[0].url)
-
+				// grab the actual image bytes as a Blob (good for uploads, previews, etc.)
 				const imageBlob = await downloadGeneratedImage(generatedImages[0].url)
+				// Hand the blob to the parent component (it decides what to do next).
 				onImageSelect(imageBlob)
 				onClose()
 			} catch (error) {
@@ -73,7 +80,7 @@ const AIImageModal = ({
 		})
 	}
 
-	// Regenerate images with new random seed for variety
+	/* ----------- Regenerate images with new random seed for variety ----------- */
 	const handleRegenerate = () => {
 		startTransition(async () => {
 			try {
@@ -84,7 +91,7 @@ const AIImageModal = ({
 					...selectedOptions,
 					seed: Date.now(), // use current timestamp as new seed
 				})
-				setGeneratedImages([image]) // save results in state
+				setGeneratedImages([image]) // replace with the new result
 			} catch (error) {
 				console.error('Error regenerating image:', error)
 				toast.error('Failed to regenerate image. Please try again.')
@@ -92,7 +99,7 @@ const AIImageModal = ({
 		})
 	}
 
-	// Don't render anything if modal is colose
+	// Don't render anything if modal is closed
 	if (!isOpen) return null
 
 	return (
@@ -121,7 +128,7 @@ const AIImageModal = ({
 					<div className='bg-white rounded-lg p-4 shadow-sm border border-gray-100'>
 						<h3 className='text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2'>
 							<div className='w-1.5 h-1.5 bg-purple-500 rounded-full'></div>
-							Customization Options
+							Customisation Options
 						</h3>
 
 						<div className='space-y-4'>

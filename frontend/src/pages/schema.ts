@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+// define a validation schema for employee form data
 export const employeeSchema = z
 	.object({
 		firstName: z.string().min(2, 'First name must be at least 2 characters'),
@@ -24,8 +25,8 @@ export const employeeSchema = z
 			.min(1, 'Start date is required')
 			.refine(
 				(date) => {
-					// Check if date is in valid format (YYYY-MM-DD)
-					const dateRegex = /^\d{4}-\d{2}-\d{2}$/
+					// Check if date is in valid format (DD-MM-YYYY)
+					const dateRegex = /^\d{2}-\d{2}-\d{4}$/
 					if (!dateRegex.test(date)) return false
 
 					// Check if it's a valid date
@@ -49,6 +50,8 @@ export const employeeSchema = z
 			.min(1, 'Hours per week must be at least 1')
 			.max(168, 'Hours per week cannot exceed 168')
 			.optional(),
+		// Thumbnail URL: must be a valid URL if provided,
+		// OR can be an empty string if user hasn’t uploaded anything
 		thumbnailUrl: z.string().url().optional().or(z.literal('')),
 	})
 	.refine(
@@ -63,7 +66,7 @@ export const employeeSchema = z
 				if (isNaN(startDate.getTime()) || isNaN(finishDate.getTime())) {
 					return false
 				}
-
+				// End date must be later than start date
 				return finishDate > startDate
 			}
 			return true
@@ -74,4 +77,6 @@ export const employeeSchema = z
 		}
 	)
 
+// This line creates a TypeScript type based on the schema above.
+// So EmployeeFormData will have the same structure and validation as employeeSchema.
 export type EmployeeFormData = z.infer<typeof employeeSchema>

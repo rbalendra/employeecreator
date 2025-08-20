@@ -10,12 +10,6 @@ import {
 	MdClose,
 	MdUpdate,
 	MdAdd,
-	MdAdminPanelSettings,
-	MdGroup,
-	MdManageAccounts,
-	MdBusiness,
-	MdSchool,
-	MdEngineering,
 } from 'react-icons/md'
 
 interface EmployeeDetailsModalProps {

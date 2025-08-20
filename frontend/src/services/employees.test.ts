@@ -5,12 +5,9 @@ import {
 	createEmployee,
 	updateEmployee,
 	deleteEmployee,
-	searchEmployees,
-	getDashboardStats,
 	type Employee,
 	type CreateEmployeeDTO,
 	type UpdateEmployeeDTO,
-	type PagedResponse,
 } from './employees'
 
 // Mock the global fetch function before any tests run
@@ -34,6 +31,7 @@ const mockEmployee: Employee = {
 	employmentBasis: 'FULL_TIME',
 	hoursPerWeek: 40,
 	thumbnailUrl: 'https://example.com/avatar.jpg',
+	role: 'EMPLOYEE',
 }
 
 // Sample data for creating a new employee (without ID)
@@ -49,6 +47,7 @@ const mockCreateEmployeeDTO: CreateEmployeeDTO = {
 	ongoing: false,
 	employmentBasis: 'PART_TIME',
 	hoursPerWeek: 25,
+	role: 'EMPLOYEE',
 }
 
 describe('Employee API Service', () => {

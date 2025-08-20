@@ -41,7 +41,7 @@ export const generateProfileImage = async (
 		'in Pixar 3D animation style, 3D cartoon character, wearing modern business attire, colorful corporate background',
 	]
 
-	let stylePrompt = stylePrompts[style]
+	let stylePrompt = stylePrompts[style] // this means that if style is not creative, we use the predefined style prompt
 
 	// If creative style is selected, randomly pick one of the creative options
 	if (style === 'creative') {
